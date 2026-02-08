@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Student Dashboard</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f7f6;
+            color: #333;
+        }
+
+        .dashboard-body {
+            display: flex;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        .sidebar {
+            width: 250px;
+            background-color: #2c3e50;
+            color: white;
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+            flex-shrink: 0;
+        }
+
+        .sidebar h2 {
+            text-align: center;
+            padding: 20px 0;
+            margin: 0;
+            background-color: #1a252f;
+            font-size: 1.2rem;
+        }
+
+        .sidebar a {
+            padding: 15px 20px;
+            text-decoration: none;
+            color: #bdc3c7;
+            display: block;
+            transition: 0.3s;
+            border-left: 4px solid transparent;
+            cursor: pointer;
+        }
+
+        .sidebar a:hover,
+        .sidebar a.active {
+            background-color: #34495e;
+            color: white;
+            border-left-color: #1abc9c;
+        }
+
+        .sidebar .logout {
+            margin-top: auto;
+            background-color: #c0392b;
+            text-align: center;
+            border-left: none;
+        }
+
+        .sidebar .logout:hover {
+            background-color: #e74c3c;
+        }
+
+        .main-content {
+            flex-grow: 1;
+            padding: 20px;
+            overflow-y: auto;
+            background-color: #ecf0f1;
+            position: relative;
+        }
+
+        .header {
+            background: white;
+            padding: 15px;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+            margin-bottom: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .header h1 {
+            margin: 0;
+            font-size: 1.5rem;
+            color: #2c3e50;
+        }
+
+        .content-section {
+            display: none;
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+            animation: fadeIn 0.4s ease-in-out;
+        }
+
+        .content-section.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 15px;
+        }
+
+        th,
+        td {
+            padding: 12px 15px;
+            border-bottom: 1px solid #ddd;
+            text-align: left;
+        }
+
+        th {
+            background-color: #2c3e50;
+            color: white;
+        }
+
+        tr:hover {
+            background-color: #f1f1f1;
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- Sidebar Wrapper -->
+    <div class="dashboard-body">
+        <!-- Sidebar -->
+        <div class="sidebar">
+            <h2>IMMS Student</h2>
+            <a onclick="showSection('home')" id="link_home" class="active">Home</a>
+            <a onclick="showSection('profile')" id="link_profile">My Profile</a>
+            <a onclick="showSection('marks')" id="link_marks">Internal Marks</a>
+            <a href="index.html" class="logout">Logout</a>
+        </div>
+
+        <!-- Main Content -->
+        <div class="main-content">
+            <div class="header">
+                <h1 id="page-title">Student Dashboard</h1>
+                <span>Welcome, <strong>Alice Johnson</strong></span>
+            </div>
+
+            <!-- Section: Home -->
+            <div id="home" class="content-section active">
+                <h2>Announcements</h2>
+                <div
+                    style="background: white; padding: 20px; border-left: 5px solid #3498db; margin-bottom: 20px; box-shadow: 0 2px 5px rgba(0,0,0,0.1);">
+                    <h3 style="margin-top:0;">CIA 1 Results Published</h3>
+                    <p>The marks for CIA 1 have been updated for all subjects. Please check your marks section.</p>
+                    <small>Posted on: 20 Jan 2026</small>
+                </div>
+            </div>
+
+            <!-- Section: Profile -->
+            <div id="profile" class="content-section">
+                <h2>My Profile</h2>
+                <div style="background: white; padding: 20px; border-radius: 8px;">
+                    <p><strong>Register Number:</strong> REG001</p>
+                    <p><strong>Name:</strong> Alice Johnson</p>
+                    <p><strong>Department:</strong> Computer Science</p>
+                    <p><strong>Semester:</strong> 3</p>
+                    <p><strong>Email:</strong> alice@college.edu</p>
+                </div>
+            </div>
+
+            <!-- Section: Marks -->
+            <div id="marks" class="content-section">
+                <h2>Internal Marks Sheet</h2>
+
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Subject Code</th>
+                            <th>Subject Name</th>
+                            <th>CIA</th>
+                            <th>Assignment</th>
+                            <th>Lab</th>
+                            <th>Total</th>
+                            <th>Grade</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>CS301</td>
+                            <td>Java Programming</td>
+                            <td>18</td>
+                            <td>9</td>
+                            <td>19</td>
+                            <td>46</td>
+                            <td>O</td>
+                        </tr>
+                        <tr>
+                            <td>CS302</td>
+                            <td>Database Systems</td>
+                            <td>15</td>
+                            <td>8</td>
+                            <td>16</td>
+                            <td>39</td>
+                            <td>A</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+        </div>
+    </div>
+
+    <script>
+        function showSection(sectionId) {
+            document.querySelectorAll('.content-section').forEach(sec => sec.classList.remove('active'));
+            document.querySelectorAll('.sidebar a').forEach(link => link.classList.remove('active'));
+
+            document.getElementById(sectionId).classList.add('active');
+            document.getElementById('link_' + sectionId).classList.add('active');
+
+            const titles = {
+                'home': 'Student Dashboard',
+                'profile': 'My Profile',
+                'marks': 'My Internal Marks'
+            };
+            document.getElementById('page-title').innerText = titles[sectionId];
+        }
+    </script>
+
+</body>
+
+</html>

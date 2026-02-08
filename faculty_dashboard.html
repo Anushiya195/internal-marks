@@ -1,0 +1,360 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Faculty Dashboard</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f7f6;
+            color: #333;
+        }
+
+        .dashboard-body {
+            display: flex;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        .sidebar {
+            width: 250px;
+            background-color: #2c3e50;
+            color: white;
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+            flex-shrink: 0;
+        }
+
+        .sidebar h2 {
+            text-align: center;
+            padding: 20px 0;
+            margin: 0;
+            background-color: #1a252f;
+            font-size: 1.2rem;
+        }
+
+        .sidebar a {
+            padding: 15px 20px;
+            text-decoration: none;
+            color: #bdc3c7;
+            display: block;
+            transition: 0.3s;
+            border-left: 4px solid transparent;
+            cursor: pointer;
+        }
+
+        .sidebar a:hover,
+        .sidebar a.active {
+            background-color: #34495e;
+            color: white;
+            border-left-color: #1abc9c;
+        }
+
+        .sidebar .logout {
+            margin-top: auto;
+            background-color: #c0392b;
+            text-align: center;
+            border-left: none;
+        }
+
+        .sidebar .logout:hover {
+            background-color: #e74c3c;
+        }
+
+        .main-content {
+            flex-grow: 1;
+            padding: 20px;
+            overflow-y: auto;
+            background-color: #ecf0f1;
+            position: relative;
+        }
+
+        .header {
+            background: white;
+            padding: 15px;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+            margin-bottom: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .header h1 {
+            margin: 0;
+            font-size: 1.5rem;
+            color: #2c3e50;
+        }
+
+        .content-section {
+            display: none;
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+            animation: fadeIn 0.4s ease-in-out;
+        }
+
+        .content-section.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        input,
+        select {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+
+        button,
+        .btn {
+            background-color: #1abc9c;
+            color: white;
+            padding: 10px 15px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: 0.3s;
+            width: auto;
+        }
+
+        button:hover,
+        .btn:hover {
+            background-color: #16a085;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 15px;
+        }
+
+        th,
+        td {
+            padding: 12px 15px;
+            border-bottom: 1px solid #ddd;
+            text-align: left;
+        }
+
+        th {
+            background-color: #2c3e50;
+            color: white;
+        }
+
+        tr:hover {
+            background-color: #f1f1f1;
+        }
+
+        .card-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+        }
+
+        .card {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            text-align: center;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+        }
+    </style>
+    <script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
+</head>
+
+<body>
+
+    <!-- Sidebar (Flex Item) -->
+    <div class="dashboard-body">
+        <div class="sidebar">
+            <h2>IMMS Faculty</h2>
+            <!-- Buttons to switch sections -->
+            <a onclick="showSection('home')" id="link_home" class="active">Home</a>
+            <a onclick="showSection('my_subjects')" id="link_my_subjects">My Subjects</a>
+            <a onclick="showSection('enter_marks')" id="link_enter_marks">Enter Marks</a>
+            <a onclick="showSection('reports')" id="link_reports">Reports</a>
+            <!-- Removed Add Student Link as requested -->
+            <a href="index.html" class="logout">Logout</a>
+        </div>
+
+        <!-- Main Content (Flex Item) -->
+        <div class="main-content">
+            <div class="header">
+                <h1 id="page-title">Dashboard</h1>
+                <span>Welcome, <strong>Dr. John Smith</strong></span>
+            </div>
+
+            <!-- Section: Home -->
+            <div id="home" class="content-section active">
+                <h2>Overview</h2>
+                <div class="card-grid">
+                    <div class="card" style="background:#3498db; color:white;">
+                        <h3>Total Students</h3>
+                        <!-- Counts from shared LocalStorage -->
+                        <p style="font-size:2rem; margin:0;" id="count_students">0</p>
+                    </div>
+                    <div class="card" style="background:#e67e22; color:white;">
+                        <h3>Pending Marks</h3>
+                        <p style="font-size:2rem; margin:0;">15</p>
+                    </div>
+                    <div class="card" style="background:#2ecc71; color:white;">
+                        <h3>Classes</h3>
+                        <p style="font-size:2rem; margin:0;">3</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Section: My Subjects -->
+            <div id="my_subjects" class="content-section">
+                <h2>My Allocated Subjects</h2>
+                <ul>
+                    <li>Java Programming (CS301) - Semester 3</li>
+                    <li>Database Systems (CS302) - Semester 3</li>
+                </ul>
+            </div>
+
+            <!-- Section: Enter Marks -->
+            <div id="enter_marks" class="content-section">
+                <h2>Enter Internal Marks</h2>
+                <div class="form-group">
+                    <label>Select Subject:</label>
+                    <select id="marks_subject_select" style="max-width:300px;">
+                        <option value="Java Programming">Java Programming (CS301)</option>
+                        <option value="Database Systems">Database Systems (CS302)</option>
+                    </select>
+                    <button class="btn" onclick="loadMarksTable()" style="width:auto; margin-top:10px;">Load
+                        Students</button>
+                </div>
+
+                <table id="marks_table">
+                    <thead>
+                        <tr>
+                            <th>Reg No</th>
+                            <th>Name</th>
+                            <th>CIA (20)</th>
+                            <th>Assign (10)</th>
+                            <th>Lab (20)</th>
+                            <th>Total</th>
+                            <th>Grade</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody id="marks_tbody">
+                        <!-- Dynamic Rows Here -->
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Removed Add Student Section -->
+
+            <!-- Section: Reports -->
+            <div id="reports" class="content-section">
+                <h2>Reports</h2>
+                <p>Download PDF/Excel reports here (Placeholder).</p>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- JavaScript Logic -->
+    <script>
+        // 1. Navigation Logic
+        function showSection(sectionId) {
+            document.querySelectorAll('.content-section').forEach(sec => sec.classList.remove('active'));
+            document.querySelectorAll('.sidebar a').forEach(link => link.classList.remove('active'));
+
+            document.getElementById(sectionId).classList.add('active');
+            document.getElementById('link_' + sectionId).classList.add('active');
+
+            const titles = {
+                'home': 'Dashboard Overview',
+                'my_subjects': 'My Subjects',
+                'enter_marks': 'Marks Entry',
+                'reports': 'Audit Reports'
+            };
+            document.getElementById('page-title').innerText = titles[sectionId];
+        }
+
+        // 2. Data Persistence Logic (Shared LocalStorage with Admin)
+        let students = [];
+
+        function loadData() {
+            // Load students created by Admin
+            students = JSON.parse(localStorage.getItem('ims_students')) || [];
+            document.getElementById('count_students').innerText = students.length;
+        }
+
+        // 3. Marks Logic
+        function loadMarksTable() {
+            const tbody = document.getElementById('marks_tbody');
+            tbody.innerHTML = '';
+
+            if (students.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="8">No students found. Admin needs to add students first.</td></tr>';
+                return;
+            }
+
+            students.forEach((stu, index) => {
+                // Try to load existing marks if any (not fully implemented in demo, but structure is here)
+                const row = `
+                <tr>
+                    <td>${stu.reg}</td>
+                    <td>${stu.name}</td>
+                    <td><input type="number" id="cia_${index}" oninput="calculateInternal(${index})" style="width:60px"></td>
+                    <td><input type="number" id="assign_${index}" oninput="calculateInternal(${index})" style="width:60px"></td>
+                    <td><input type="number" id="lab_${index}" oninput="calculateInternal(${index})" style="width:60px"></td>
+                    <td><span id="total_${index}" style="font-weight:bold">0</span></td>
+                    <td><span id="grade_${index}">-</span></td>
+                    <td><button class="btn" style="padding:5px 10px; font-size:0.8rem">Save</button></td>
+                </tr>
+                `;
+                tbody.innerHTML += row;
+            });
+        }
+
+        function calculateInternal(idx) {
+            const cia = parseFloat(document.getElementById(`cia_${idx}`).value) || 0;
+            const assign = parseFloat(document.getElementById(`assign_${idx}`).value) || 0;
+            const lab = parseFloat(document.getElementById(`lab_${idx}`).value) || 0;
+
+            const total = cia + assign + lab;
+            document.getElementById(`total_${idx}`).innerText = total;
+
+            let grade = 'F';
+            if (total >= 45) grade = 'O';
+            else if (total >= 30) grade = 'A';
+            else if (total >= 25) grade = 'B';
+
+            document.getElementById(`grade_${idx}`).innerText = grade;
+        }
+
+        // Initialize on Load
+        window.onload = function () {
+            loadData();
+        };
+
+    </script>
+
+</body>
+
+</html>

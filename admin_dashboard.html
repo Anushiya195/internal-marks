@@ -1,0 +1,516 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f7f6;
+            color: #333;
+        }
+
+        .dashboard-body {
+            display: flex;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        .sidebar {
+            width: 250px;
+            background-color: #2c3e50;
+            color: white;
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+            flex-shrink: 0;
+        }
+
+        .sidebar h2 {
+            text-align: center;
+            padding: 20px 0;
+            margin: 0;
+            background-color: #1a252f;
+            font-size: 1.2rem;
+        }
+
+        .sidebar a {
+            padding: 15px 20px;
+            text-decoration: none;
+            color: #bdc3c7;
+            display: block;
+            transition: 0.3s;
+            border-left: 4px solid transparent;
+            cursor: pointer;
+        }
+
+        .sidebar a:hover,
+        .sidebar a.active {
+            background-color: #34495e;
+            color: white;
+            border-left-color: #1abc9c;
+        }
+
+        .sidebar .logout {
+            margin-top: auto;
+            background-color: #c0392b;
+            text-align: center;
+            border-left: none;
+        }
+
+        .sidebar .logout:hover {
+            background-color: #e74c3c;
+        }
+
+        .main-content {
+            flex-grow: 1;
+            padding: 20px;
+            overflow-y: auto;
+            background-color: #ecf0f1;
+            position: relative;
+        }
+
+        .header {
+            background: white;
+            padding: 15px;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+            margin-bottom: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .header h1 {
+            margin: 0;
+            font-size: 1.5rem;
+            color: #2c3e50;
+        }
+
+        .content-section {
+            display: none;
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+            animation: fadeIn 0.4s ease-in-out;
+        }
+
+        .content-section.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        input,
+        select {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+
+        button,
+        .btn {
+            background-color: #1abc9c;
+            color: white;
+            padding: 10px 15px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: 0.3s;
+            width: auto;
+        }
+
+        button:hover,
+        .btn:hover {
+            background-color: #16a085;
+        }
+
+        .btn-danger {
+            background-color: #e74c3c;
+        }
+
+        .btn-danger:hover {
+            background-color: #c0392b;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 15px;
+        }
+
+        th,
+        td {
+            padding: 12px 15px;
+            border-bottom: 1px solid #ddd;
+            text-align: left;
+        }
+
+        th {
+            background-color: #2c3e50;
+            color: white;
+        }
+
+        tr:hover {
+            background-color: #f1f1f1;
+        }
+
+        .card-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+        }
+
+        .card {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            text-align: center;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+        }
+    </style>
+    <script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
+</head>
+
+<body>
+
+    <div class="dashboard-body">
+        <!-- Sidebar -->
+        <div class="sidebar">
+            <h2>IMMS Admin</h2>
+            <a onclick="showSection('home')" id="link_home" class="active">Overview</a>
+            <a onclick="showSection('add_dept')" id="link_add_dept">Departments</a>
+            <a onclick="showSection('add_subject')" id="link_add_subject">Subjects</a>
+            <a onclick="showSection('add_faculty')" id="link_add_faculty">Faculty</a>
+            <a onclick="showSection('add_student')" id="link_add_student">Students</a>
+            <a href="index.html" class="logout">Logout</a>
+        </div>
+
+        <!-- Main Content -->
+        <div class="main-content">
+            <div class="header">
+                <h1 id="page-title">Admin Overview</h1>
+                <span>Logged in as <strong>Administrator</strong></span>
+            </div>
+
+            <!-- Section: Home -->
+            <div id="home" class="content-section active">
+                <h2>System Status</h2>
+                <div class="card-grid">
+                    <div class="card">
+                        <h3>Departments</h3>
+                        <p id="count_depts">0</p>
+                    </div>
+                    <div class="card">
+                        <h3>Subjects</h3>
+                        <p id="count_subjects">0</p>
+                    </div>
+                    <div class="card">
+                        <h3>Faculty</h3>
+                        <p id="count_faculty">0</p>
+                    </div>
+                    <div class="card">
+                        <h3>Students</h3>
+                        <p id="count_students">0</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Section: Add Department -->
+            <div id="add_dept" class="content-section">
+                <h2>Manage Departments</h2>
+                <div style="max-width:400px; margin-bottom:20px;">
+                    <input type="text" id="dept_name" placeholder="Department Name (e.g. Mechanical)">
+                    <button class="btn" onclick="addDept()">Add Department</button>
+                </div>
+                <h3>Existing Departments</h3>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Department Name</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody id="dept_tbody"></tbody>
+                </table>
+            </div>
+
+            <!-- Section: Add Subject -->
+            <div id="add_subject" class="content-section">
+                <h2>Manage Subjects</h2>
+                <div style="max-width:400px; margin-bottom:20px;">
+                    <input type="text" id="sub_name" placeholder="Subject Name">
+                    <input type="text" id="sub_code" placeholder="Subject Code (e.g. ME101)">
+                    <select id="sub_dept_select">
+                        <option>Select Dept</option>
+                    </select>
+                    <button class="btn" onclick="addSubject()">Add Subject</button>
+                </div>
+                <h3>Subject List</h3>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Code</th>
+                            <th>Name</th>
+                            <th>Dept</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody id="sub_tbody"></tbody>
+                </table>
+            </div>
+
+            <!-- Section: Add Faculty -->
+            <div id="add_faculty" class="content-section">
+                <h2>Manage Faculty</h2>
+                <div style="max-width:400px; margin-bottom:20px;">
+                    <input type="text" id="fac_name" placeholder="Faculty Name">
+                    <input type="text" id="fac_id" placeholder="Faculty ID / Username">
+                    <select id="fac_dept_select">
+                        <option>Select Dept</option>
+                    </select>
+                    <button class="btn" onclick="addFaculty()">Add Faculty</button>
+                </div>
+                <h3>Registered Faculty</h3>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Name</th>
+                            <th>Dept</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody id="fac_tbody"></tbody>
+                </table>
+            </div>
+
+            <!-- Section: Add Student -->
+            <div id="add_student" class="content-section">
+                <h2>Manage Students</h2>
+                <div style="max-width:400px; margin-bottom:20px;">
+                    <input type="text" id="stu_reg" placeholder="Register Number">
+                    <input type="text" id="stu_name" placeholder="Student Name">
+                    <select id="stu_dept_select">
+                        <option>Select Dept</option>
+                    </select>
+                    <input type="number" id="stu_sem" placeholder="Semester" min="1" max="8">
+                    <button class="btn" onclick="addStudent()">Add Student</button>
+                </div>
+                <h3>Enrolled Students</h3>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Reg No</th>
+                            <th>Name</th>
+                            <th>Dept</th>
+                            <th>Sem</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody id="stu_tbody"></tbody>
+                </table>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- JS Logic for Dynamic Management -->
+    <script>
+        // Init Mock Database in LocalStorage if not exists
+        if (!localStorage.getItem('admin_depts')) {
+            localStorage.setItem('admin_depts', JSON.stringify(['Computer Science', 'IT', 'Mechanical']));
+        }
+        if (!localStorage.getItem('admin_subjects')) {
+            localStorage.setItem('admin_subjects', JSON.stringify([
+                { name: 'Java', code: 'CS301', dept: 'Computer Science' },
+                { name: 'Web Tech', code: 'IT401', dept: 'IT' }
+            ]));
+        }
+        if (!localStorage.getItem('admin_faculty')) {
+            localStorage.setItem('admin_faculty', JSON.stringify([
+                { name: 'Dr. Smith', id: 'fac01', dept: 'Computer Science' }
+            ]));
+        }
+        if (!localStorage.getItem('ims_students')) { // Shared with Faculty View
+            localStorage.setItem('ims_students', JSON.stringify([
+                { name: 'Alice', reg: 'REG001', dept: 'Computer Science', sem: 3 }
+            ]));
+        }
+
+        // --- View Logic ---
+        function showSection(id) {
+            document.querySelectorAll('.content-section').forEach(s => s.classList.remove('active'));
+            document.querySelectorAll('.sidebar a').forEach(a => a.classList.remove('active'));
+            document.getElementById(id).classList.add('active');
+            document.getElementById('link_' + id).classList.add('active');
+
+            // Refresh tables when viewing
+            renderAll();
+        }
+
+        // --- Render Functions ---
+        function renderAll() {
+            renderDepts();
+            renderSubjects();
+            renderFaculty();
+            renderStudents();
+            updateStats();
+            populateDeptDropdowns();
+        }
+
+        function populateDeptDropdowns() {
+            const depts = JSON.parse(localStorage.getItem('admin_depts'));
+            const options = depts.map(d => `<option value="${d}">${d}</option>`).join('');
+
+            document.getElementById('sub_dept_select').innerHTML = '<option>Select Dept</option>' + options;
+            document.getElementById('fac_dept_select').innerHTML = '<option>Select Dept</option>' + options;
+            document.getElementById('stu_dept_select').innerHTML = '<option>Select Dept</option>' + options;
+        }
+
+        function renderDepts() {
+            const list = JSON.parse(localStorage.getItem('admin_depts'));
+            const tbody = document.getElementById('dept_tbody');
+            tbody.innerHTML = list.map((dept, i) => `
+                <tr>
+                    <td>${i + 1}</td>
+                    <td>${dept}</td>
+                    <td><button class="btn btn-danger" style="width:auto; padding:5px 10px;" onclick="delItem('admin_depts', ${i})">Del</button></td>
+                </tr>`).join('');
+        }
+
+        function renderSubjects() {
+            const list = JSON.parse(localStorage.getItem('admin_subjects'));
+            const tbody = document.getElementById('sub_tbody');
+            tbody.innerHTML = list.map((sub, i) => `
+                <tr>
+                    <td>${sub.code}</td>
+                    <td>${sub.name}</td>
+                    <td>${sub.dept}</td>
+                    <td><button class="btn btn-danger" style="width:auto; padding:5px 10px;" onclick="delItem('admin_subjects', ${i})">Del</button></td>
+                </tr>`).join('');
+        }
+
+        function renderFaculty() {
+            const list = JSON.parse(localStorage.getItem('admin_faculty'));
+            const tbody = document.getElementById('fac_tbody');
+            tbody.innerHTML = list.map((f, i) => `
+                <tr>
+                    <td>${f.id}</td>
+                    <td>${f.name}</td>
+                    <td>${f.dept}</td>
+                    <td><button class="btn btn-danger" style="width:auto; padding:5px 10px;" onclick="delItem('admin_faculty', ${i})">Del</button></td>
+                </tr>`).join('');
+        }
+
+        function renderStudents() {
+            const list = JSON.parse(localStorage.getItem('ims_students'));
+            const tbody = document.getElementById('stu_tbody');
+            tbody.innerHTML = list.map((s, i) => `
+                <tr>
+                    <td>${s.reg}</td>
+                    <td>${s.name}</td>
+                    <td>${s.dept}</td>
+                    <td>${s.sem || '-'}</td>
+                    <td><button class="btn btn-danger" style="width:auto; padding:5px 10px;" onclick="delItem('ims_students', ${i})">Del</button></td>
+                </tr>`).join('');
+        }
+
+        function updateStats() {
+            document.getElementById('count_depts').innerText = JSON.parse(localStorage.getItem('admin_depts')).length;
+            document.getElementById('count_subjects').innerText = JSON.parse(localStorage.getItem('admin_subjects')).length;
+            document.getElementById('count_faculty').innerText = JSON.parse(localStorage.getItem('admin_faculty')).length;
+            document.getElementById('count_students').innerText = JSON.parse(localStorage.getItem('ims_students')).length;
+        }
+
+        // --- Add/Delete Functions ---
+        function delItem(key, index) {
+            if (confirm('Are you sure?')) {
+                const list = JSON.parse(localStorage.getItem(key));
+                list.splice(index, 1);
+                localStorage.setItem(key, JSON.stringify(list));
+                renderAll();
+            }
+        }
+
+        function addDept() {
+            const val = document.getElementById('dept_name').value;
+            if (val) {
+                const list = JSON.parse(localStorage.getItem('admin_depts'));
+                list.push(val);
+                localStorage.setItem('admin_depts', JSON.stringify(list));
+                document.getElementById('dept_name').value = '';
+                renderAll();
+            }
+        }
+
+        function addSubject() {
+            const name = document.getElementById('sub_name').value;
+            const code = document.getElementById('sub_code').value;
+            const dept = document.getElementById('sub_dept_select').value;
+            if (name && code && dept !== 'Select Dept') {
+                const list = JSON.parse(localStorage.getItem('admin_subjects'));
+                list.push({ name, code, dept });
+                localStorage.setItem('admin_subjects', JSON.stringify(list));
+                renderAll();
+                // Clear
+                document.getElementById('sub_name').value = '';
+                document.getElementById('sub_code').value = '';
+            }
+        }
+
+        function addFaculty() {
+            const name = document.getElementById('fac_name').value;
+            const id = document.getElementById('fac_id').value;
+            const dept = document.getElementById('fac_dept_select').value;
+            if (name && id && dept !== 'Select Dept') {
+                const list = JSON.parse(localStorage.getItem('admin_faculty'));
+                list.push({ name, id, dept });
+                localStorage.setItem('admin_faculty', JSON.stringify(list));
+                renderAll();
+                document.getElementById('fac_name').value = '';
+                document.getElementById('fac_id').value = '';
+            }
+        }
+
+        function addStudent() {
+            const name = document.getElementById('stu_name').value;
+            const reg = document.getElementById('stu_reg').value;
+            const dept = document.getElementById('stu_dept_select').value;
+            const sem = document.getElementById('stu_sem').value;
+            if (name && reg && dept !== 'Select Dept') {
+                const list = JSON.parse(localStorage.getItem('ims_students'));
+                list.push({ name, reg, dept, sem });
+                localStorage.setItem('ims_students', JSON.stringify(list));
+                renderAll();
+                document.getElementById('stu_name').value = '';
+                document.getElementById('stu_reg').value = '';
+            }
+        }
+
+        // Init
+        window.onload = renderAll;
+    </script>
+
+</body>
+
+</html>
