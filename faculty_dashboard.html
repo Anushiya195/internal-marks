@@ -1,0 +1,701 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Faculty Dashboard</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f7f6;
+            color: #333;
+        }
+
+        .dashboard-body {
+            display: flex;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        .sidebar {
+            width: 250px;
+            background-color: #2c3e50;
+            color: white;
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+            flex-shrink: 0;
+        }
+
+        .sidebar h2 {
+            text-align: center;
+            padding: 20px 0;
+            margin: 0;
+            background-color: #1a252f;
+            font-size: 1.2rem;
+        }
+
+        .sidebar a {
+            padding: 15px 20px;
+            text-decoration: none;
+            color: #bdc3c7;
+            display: block;
+            transition: 0.3s;
+            border-left: 4px solid transparent;
+            cursor: pointer;
+        }
+
+        .sidebar a:hover,
+        .sidebar a.active {
+            background-color: #34495e;
+            color: white;
+            border-left-color: #1abc9c;
+        }
+
+        .sidebar .logout {
+            margin-top: auto;
+            background-color: #c0392b;
+            text-align: center;
+            border-left: none;
+        }
+
+        .sidebar .logout:hover {
+            background-color: #e74c3c;
+        }
+
+        .main-content {
+            flex-grow: 1;
+            padding: 20px;
+            overflow-y: auto;
+            background-color: #ecf0f1;
+            position: relative;
+        }
+
+        .header {
+            background: white;
+            padding: 15px;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+            margin-bottom: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .header h1 {
+            margin: 0;
+            font-size: 1.5rem;
+            color: #2c3e50;
+        }
+
+        .content-section {
+            display: none;
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+            animation: fadeIn 0.4s ease-in-out;
+        }
+
+        .content-section.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        input,
+        select {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+
+        button,
+        .btn {
+            background-color: #1abc9c;
+            color: white;
+            padding: 10px 15px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: 0.3s;
+            width: auto;
+        }
+
+        button:hover,
+        .btn:hover {
+            background-color: #16a085;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 15px;
+        }
+
+        th,
+        td {
+            padding: 12px 15px;
+            border-bottom: 1px solid #ddd;
+            text-align: left;
+        }
+
+        th {
+            background-color: #2c3e50;
+            color: white;
+        }
+
+        tr:hover {
+            background-color: #f1f1f1;
+        }
+
+        .card-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+        }
+
+        .card {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            text-align: center;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+        }
+    </style>
+    <script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
+    <!-- PDF Generation Libraries -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js"></script>
+</head>
+
+<body>
+
+    <!-- Sidebar (Flex Item) -->
+    <div class="dashboard-body">
+        <div class="sidebar">
+            <h2>IMMS Faculty</h2>
+            <!-- Buttons to switch sections -->
+            <a onclick="showSection('home')" id="link_home" class="active">Home</a>
+            <a onclick="showSection('my_subjects')" id="link_my_subjects">My Subjects</a>
+            <a onclick="showSection('enter_marks')" id="link_enter_marks">Enter Marks</a>
+            <a onclick="showSection('reports')" id="link_reports">Reports</a>
+            <!-- Removed Add Student Link as requested -->
+            <a href="index.html" class="logout">Logout</a>
+        </div>
+
+        <!-- Main Content (Flex Item) -->
+        <div class="main-content">
+            <div class="header">
+                <h1 id="page-title">Dashboard</h1>
+                <span>Welcome, <strong id="fac_welcome_name">Faculty Name</strong></span>
+            </div>
+
+            <!-- Section: Home -->
+            <div id="home" class="content-section active">
+                <h2>Overview</h2>
+                <div class="card-grid">
+                    <div class="card" style="background:#3498db; color:white;">
+                        <h3>Total Students</h3>
+                        <!-- Counts from shared LocalStorage -->
+                        <p style="font-size:2rem; margin:0;" id="count_students">0</p>
+                    </div>
+                    <div class="card" style="background:#e67e22; color:white;">
+                        <h3>Pending Marks</h3>
+                        <p style="font-size:2rem; margin:0;">15</p>
+                    </div>
+                    <div class="card" style="background:#2ecc71; color:white;">
+                        <h3>Classes</h3>
+                        <p style="font-size:2rem; margin:0;">3</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Section: My Subjects -->
+            <div id="my_subjects" class="content-section">
+                <h2>My Allocated Subjects</h2>
+                <div id="fac_subject_list"></div>
+            </div>
+
+            <!-- Section: Enter Marks -->
+            <div id="enter_marks" class="content-section">
+                <h2>Enter Internal Marks</h2>
+                <div class="form-group"
+                    style="background: #fdfdfd; padding: 15px; border-radius: 8px; border: 1px solid #eee; margin-bottom: 20px;">
+                    <div style="display: flex; gap: 20px; align-items: flex-end; flex-wrap: wrap;">
+                        <div style="flex: 1; min-width: 200px;">
+                            <label>Select Subject:</label>
+                            <select id="marks_subject_select">
+                                <option value="Java Programming">Java Programming (CS301)</option>
+                                <option value="Database Systems">Database Systems (CS302)</option>
+                            </select>
+                        </div>
+                        <div style="flex: 1; min-width: 200px;">
+                            <label>Entry Mode:</label>
+                            <select id="marks_mode_select" onchange="updateTableHeaders()">
+                                <option value="iat1">IAT 1 Marks (Max 100)</option>
+                                <option value="iat2">IAT 2 Marks (Max 100)</option>
+                                <option value="iat3">IAT 3 Marks (Max 100)</option>
+                                <option value="internal">Final Internal (Attend 10 + Assign 10 + IAT Avg 30)</option>
+                            </select>
+                        </div>
+                        <button class="btn" onclick="loadMarksTable()" style="height: 40px;">Load Students</button>
+                    </div>
+                </div>
+
+                <div id="marks_table_container" style="overflow-x: auto;">
+                    <table id="marks_table">
+                        <thead id="marks_thead">
+                            <!-- Dynamic Headers -->
+                        </thead>
+                        <tbody id="marks_tbody">
+                            <!-- Dynamic Rows Here -->
+                        </tbody>
+                    </table>
+                </div>
+
+                <div style="margin-top:20px; display: flex; justify-content: space-between; align-items: center;">
+                    <span style="font-size:0.85rem; color:#666;">
+                        <i class="fas fa-info-circle"></i>
+                        <span id="publish_status_note">Marks entered here reflect in the final internal
+                            calculation.</span>
+                    </span>
+                    <div>
+                        <button class="btn" style="background:#e74c3c; padding:12px 20px; margin-right: 10px;"
+                            onclick="clearAllMarks()">
+                            <i class="fas fa-redo"></i> Reset Table
+                        </button>
+                        <button class="btn" style="background:#27ae60; padding:12px 30px;" onclick="saveAllMarks()">
+                            <i class="fas fa-save"></i> Save All Marks
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Removed Add Student Section -->
+
+            <div id="reports" class="content-section">
+                <h2>Generate Internal Marks Reports</h2>
+                <div
+                    style="background: #f8f9fa; padding: 20px; border-radius: 8px; border: 1px dashed #ccc; text-align: center;">
+                    <i class="fas fa-file-pdf" style="font-size: 3rem; color: #e74c3c; margin-bottom: 15px;"></i>
+                    <p>Select a subject and Click below to download the compiled marksheet as a professional PDF
+                        document.</p>
+                    <button class="btn" onclick="downloadMarksPDF()" style="background:#e74c3c; padding: 12px 25px;">
+                        Download Final Marksheet (PDF)
+                    </button>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <script>
+        // 1. Navigation Logic
+        function showSection(sectionId) {
+            sessionStorage.setItem('last_section', sectionId);
+            document.querySelectorAll('.content-section').forEach(sec => sec.classList.remove('active'));
+            document.querySelectorAll('.sidebar a').forEach(link => link.classList.remove('active'));
+
+            document.getElementById(sectionId).classList.add('active');
+            document.getElementById('link_' + sectionId).classList.add('active');
+
+            const titles = {
+                'home': 'Dashboard Overview',
+                'my_subjects': 'My Subjects',
+                'enter_marks': 'Marks Entry',
+                'reports': 'Audit Reports'
+            };
+            document.getElementById('page-title').innerText = titles[sectionId];
+
+            if (sectionId === 'enter_marks') {
+                updateTableHeaders();
+            }
+        }
+
+        let students = [];
+        let currentUser = null;
+
+        function loadData() {
+            // Check session
+            const session = sessionStorage.getItem('loggedInUser');
+            if (!session) {
+                window.location.href = 'index.html';
+                return;
+            }
+            currentUser = JSON.parse(session);
+            document.getElementById('fac_welcome_name').innerText = currentUser.name;
+
+            // Load subjects assigned to this faculty
+            const allAssignments = JSON.parse(localStorage.getItem('admin_faculty')) || [];
+            const myAssignments = allAssignments.filter(f => f.id === currentUser.user);
+
+            const subList = document.getElementById('fac_subject_list');
+            if (myAssignments.length > 0) {
+                subList.innerHTML = `<ul>${myAssignments.map(a => `<li>${a.subject} (${a.code}) - Semester ${a.sem}</li>`).join('')}</ul>`;
+                // Update marks entry select
+                const options = myAssignments.map(a => `<option value="${a.code}">${a.subject} (${a.code})</option>`).join('');
+                document.getElementById('marks_subject_select').innerHTML = options;
+            } else {
+                subList.innerHTML = '<p style="color:red;">No subjects assigned to you yet. Please contact Admin.</p>';
+                document.getElementById('marks_subject_select').innerHTML = '<option>No subjects found</option>';
+            }
+
+            // Load students
+            students = JSON.parse(localStorage.getItem('ims_students')) || [];
+            document.getElementById('count_students').innerText = students.length;
+        }
+
+        function updateTableHeaders() {
+            const mode = document.getElementById('marks_mode_select').value;
+            const thead = document.getElementById('marks_thead');
+
+            let headRow = '';
+            if (mode === 'iat1' || mode === 'iat2' || mode === 'iat3') {
+                const label = mode.toUpperCase().replace('IAT', 'IAT ');
+                headRow = `
+                    <tr>
+                        <th>Reg No</th>
+                        <th>Name</th>
+                        <th>${label} Score (Max 100)</th>
+                        <th>Action</th>
+                    </tr>
+                `;
+            } else {
+                headRow = `
+                    <tr>
+                        <th>Reg No</th>
+                        <th>Name</th>
+                        <th>IAT 1</th>
+                        <th>IAT 2</th>
+                        <th>IAT 3</th>
+                        <th>Attend (10)</th>
+                        <th>Assign (10)</th>
+                        <th>Total (50)</th>
+                        <th>Grade</th>
+                        <th>Action</th>
+                    </tr>
+                `;
+            }
+            thead.innerHTML = headRow;
+            loadMarksTable(); // Reload data with new headers
+        }
+
+        // 3. Marks Logic
+        function loadMarksTable() {
+            const tbody = document.getElementById('marks_tbody');
+            const mode = document.getElementById('marks_mode_select').value;
+            const subCode = document.getElementById('marks_subject_select').value;
+            tbody.innerHTML = '';
+
+            if (students.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="${mode === 'internal' ? 10 : 4}">No students found. Admin needs to add students first.</td></tr>`;
+                return;
+            }
+
+            const allMarks = JSON.parse(localStorage.getItem('ims_marks')) || [];
+
+            students.forEach((stu, index) => {
+                const existing = allMarks.find(m => m.reg === stu.reg && m.code === subCode);
+
+                let row = '';
+                if (mode === 'iat1' || mode === 'iat2' || mode === 'iat3') {
+                    const val = existing ? existing[mode] : 0;
+                    row = `
+                        <tr>
+                            <td>${stu.reg}</td>
+                            <td>${stu.name}</td>
+                            <td><input type="number" id="${mode}_${index}" style="width:100px" value="${val}" min="0" max="100"></td>
+                            <td><button class="btn" style="padding:5px 10px; font-size:0.8rem" onclick="saveSingleRow(${index})">Save</button></td>
+                        </tr>
+                    `;
+                } else {
+                    const iat1 = existing ? (existing.iat1 || 0) : 0;
+                    const iat2 = existing ? (existing.iat2 || 0) : 0;
+                    const iat3 = existing ? (existing.iat3 || 0) : 0;
+                    const attendance = existing ? (existing.attendance || 0) : 0;
+                    const assignment = existing ? (existing.assignment || 0) : 0;
+
+                    row = `
+                        <tr>
+                            <td>${stu.reg}</td>
+                            <td>${stu.name}</td>
+                            <td><input type="number" id="iat1_${index}" readonly style="width:50px; background-color:#e9ecef; border:1px solid #ccc; cursor:not-allowed;" value="${iat1}"></td>
+                            <td><input type="number" id="iat2_${index}" readonly style="width:50px; background-color:#e9ecef; border:1px solid #ccc; cursor:not-allowed;" value="${iat2}"></td>
+                            <td><input type="number" id="iat3_${index}" readonly style="width:50px; background-color:#e9ecef; border:1px solid #ccc; cursor:not-allowed;" value="${iat3}"></td>
+                            <td><input type="number" id="attendance_${index}" oninput="calculateInternal(${index})" style="width:50px" value="${attendance}"></td>
+                            <td><input type="number" id="assignment_${index}" oninput="calculateInternal(${index})" style="width:50px" value="${assignment}"></td>
+                            <td><span id="total_${index}" style="font-weight:bold">0</span></td>
+                            <td><span id="grade_${index}">-</span></td>
+                            <td><button class="btn" style="padding:5px 10px; font-size:0.8rem" onclick="saveSingleRow(${index})">Save</button></td>
+                        </tr>
+                    `;
+                }
+                tbody.innerHTML += row;
+                if (mode === 'internal') calculateInternal(index);
+            });
+        }
+
+        function saveSingleRow(idx) {
+            const subCode = document.getElementById('marks_subject_select').value;
+            const mode = document.getElementById('marks_mode_select').value;
+            const stu = students[idx];
+
+            let allMarks = JSON.parse(localStorage.getItem('ims_marks')) || [];
+            let existingIdx = allMarks.findIndex(m => m.reg === stu.reg && m.code === subCode);
+
+            let markData = existingIdx > -1 ? allMarks[existingIdx] : {
+                reg: stu.reg, name: stu.name, code: subCode,
+                iat1: 0, iat2: 0, iat3: 0, attendance: 0, assignment: 0,
+                total: 0, grade: 'F', facultyId: currentUser.user
+            };
+
+            if (mode === 'iat1' || mode === 'iat2' || mode === 'iat3') {
+                markData[mode] = parseFloat(document.getElementById(`${mode}_${idx}`).value) || 0;
+            } else {
+                markData.iat1 = parseFloat(document.getElementById(`iat1_${idx}`).value) || 0;
+                markData.iat2 = parseFloat(document.getElementById(`iat2_${idx}`).value) || 0;
+                markData.iat3 = parseFloat(document.getElementById(`iat3_${idx}`).value) || 0;
+                markData.attendance = parseFloat(document.getElementById(`attendance_${idx}`).value) || 0;
+                markData.assignment = parseFloat(document.getElementById(`assignment_${idx}`).value) || 0;
+            }
+
+            // Recalculate
+            const iatAvg = (markData.iat1 + markData.iat2 + markData.iat3) / 10;
+            markData.total = parseFloat((iatAvg + markData.attendance + markData.assignment).toFixed(2));
+            markData.grade = getGrade(markData.total);
+
+            if (existingIdx > -1) {
+                allMarks[existingIdx] = markData;
+            } else {
+                allMarks.push(markData);
+            }
+
+            localStorage.setItem('ims_marks', JSON.stringify(allMarks));
+            alert(`Marks updated for ${stu.name}`);
+            if (mode === 'internal') calculateInternal(idx);
+        }
+
+        function getGrade(total) {
+            if (total >= 40) return 'O';
+            if (total >= 30) return 'A';
+            if (total >= 20) return 'B';
+            if (total >= 15) return 'C';
+            return 'F';
+        }
+
+        function calculateInternal(idx) {
+            const iat1 = parseFloat(document.getElementById(`iat1_${idx}`).value) || 0;
+            const iat2 = parseFloat(document.getElementById(`iat2_${idx}`).value) || 0;
+            const iat3 = parseFloat(document.getElementById(`iat3_${idx}`).value) || 0;
+            const attendance = parseFloat(document.getElementById(`attendance_${idx}`).value) || 0;
+            const assignment = parseFloat(document.getElementById(`assignment_${idx}`).value) || 0;
+
+            const iatAvg = (iat1 + iat2 + iat3) / 10;
+            const total = parseFloat((iatAvg + attendance + assignment).toFixed(2));
+            document.getElementById(`total_${idx}`).innerText = total;
+            document.getElementById(`grade_${idx}`).innerText = getGrade(total);
+        }
+
+        function saveAllMarks() {
+            if (students.length === 0) {
+                alert("No students to save.");
+                return;
+            }
+            const subCode = document.getElementById('marks_subject_select').value;
+            const mode = document.getElementById('marks_mode_select').value;
+            let allMarks = JSON.parse(localStorage.getItem('ims_marks')) || [];
+
+            students.forEach((stu, idx) => {
+                let existingIdx = allMarks.findIndex(m => m.reg === stu.reg && m.code === subCode);
+                let markData = existingIdx > -1 ? allMarks[existingIdx] : {
+                    reg: stu.reg, name: stu.name, code: subCode,
+                    iat1: 0, iat2: 0, iat3: 0, attendance: 0, assignment: 0,
+                    total: 0, grade: 'F', facultyId: currentUser.user
+                };
+
+                if (mode === 'iat1' || mode === 'iat2' || mode === 'iat3') {
+                    markData[mode] = parseFloat(document.getElementById(`${mode}_${idx}`).value) || 0;
+                } else {
+                    markData.iat1 = parseFloat(document.getElementById(`iat1_${idx}`).value) || 0;
+                    markData.iat2 = parseFloat(document.getElementById(`iat2_${idx}`).value) || 0;
+                    markData.iat3 = parseFloat(document.getElementById(`iat3_${idx}`).value) || 0;
+                    markData.attendance = parseFloat(document.getElementById(`attendance_${idx}`).value) || 0;
+                    markData.assignment = parseFloat(document.getElementById(`assignment_${idx}`).value) || 0;
+                }
+
+                const iatAvg = (markData.iat1 + markData.iat2 + markData.iat3) / 10;
+                markData.total = parseFloat((iatAvg + markData.attendance + markData.assignment).toFixed(2));
+                markData.grade = getGrade(markData.total);
+
+                if (existingIdx > -1) {
+                    allMarks[existingIdx] = markData;
+                } else {
+                    allMarks.push(markData);
+                }
+            });
+
+            localStorage.setItem('ims_marks', JSON.stringify(allMarks));
+            alert("All marks saved successfully! Page refresh will not lose data.");
+        }
+
+        function clearAllMarks() {
+            if (confirm("Are you sure you want to completely clear the entries currently visible in this table? This will overwrite existing stored marks for this table.")) {
+                const subCode = document.getElementById('marks_subject_select').value;
+                const mode = document.getElementById('marks_mode_select').value;
+                let allMarks = JSON.parse(localStorage.getItem('ims_marks')) || [];
+
+                students.forEach((stu, idx) => {
+                    let existingIdx = allMarks.findIndex(m => m.reg === stu.reg && m.code === subCode);
+                    if (existingIdx > -1) {
+                        let markData = allMarks[existingIdx];
+                        if (mode === 'iat1' || mode === 'iat2' || mode === 'iat3') {
+                            markData[mode] = 0;
+                        } else {
+                            markData.attendance = 0;
+                            markData.assignment = 0;
+                        }
+                        const iatAvg = (markData.iat1 + markData.iat2 + markData.iat3) / 10;
+                        markData.total = parseFloat((iatAvg + markData.attendance + markData.assignment).toFixed(2));
+                        markData.grade = getGrade(markData.total);
+                        allMarks[existingIdx] = markData;
+                    }
+
+                    // Reset UI
+                    if (mode === 'iat1' || mode === 'iat2' || mode === 'iat3') {
+                        let inputEl = document.getElementById(`${mode}_${idx}`);
+                        if (inputEl) inputEl.value = 0;
+                    } else {
+                        let attEl = document.getElementById(`attendance_${idx}`);
+                        let assignEl = document.getElementById(`assignment_${idx}`);
+                        if (attEl) attEl.value = 0;
+                        if (assignEl) assignEl.value = 0;
+                        calculateInternal(idx);
+                    }
+                });
+
+                localStorage.setItem('ims_marks', JSON.stringify(allMarks));
+                alert("Table reset successfully.");
+            }
+        }
+
+        // PDF Download Function
+        async function downloadMarksPDF() {
+            const { jsPDF } = window.jspdf;
+            const doc = jsPDF({ orientation: 'l', unit: 'mm', format: 'a4' });
+
+            // ... (headers remains similar, positions might need adjustment for landscape)
+            doc.setFontSize(18);
+            doc.setTextColor(40);
+            doc.text('INTERNAL MARKS MANAGEMENT SYSTEM', 148, 20, null, null, 'center');
+
+            doc.setFontSize(12);
+            doc.text('ACADEMIC INTERNAL MARKSHEET (IAT 1, 2, 3 & INTERNAL)', 148, 28, null, null, 'center');
+
+            doc.setLineWidth(0.5);
+            doc.line(20, 32, 277, 32);
+
+            // Faculty & Subject Info
+            doc.setFontSize(10);
+            doc.text(`Faculty Name: ${currentUser.name}`, 20, 40);
+            doc.text(`Staff ID: ${currentUser.user}`, 20, 45);
+            doc.text(`Subject: ${subName}`, 20, 50);
+            doc.text(`Date: ${new Date().toLocaleDateString()}`, 277, 40, null, null, 'right');
+
+            // Table Data
+            const rows = [];
+            const tableRows = document.querySelectorAll('#marks_tbody tr');
+
+            tableRows.forEach((tr, idx) => {
+                const row = [
+                    tr.cells[0].innerText, // Reg No
+                    tr.cells[1].innerText, // Name
+                    document.getElementById(`iat1_${idx}`).value || '0',
+                    document.getElementById(`iat2_${idx}`).value || '0',
+                    document.getElementById(`iat3_${idx}`).value || '0',
+                    document.getElementById(`attendance_${idx}`).value || '0',
+                    document.getElementById(`assign_${idx}`).value || '0',
+                    document.getElementById(`total_${idx}`).innerText || '0',
+                    document.getElementById(`grade_${idx}`).innerText || '-'
+                ];
+                rows.push(row);
+            });
+
+            doc.autoTable({
+                startY: 55,
+                head: [['Reg No', 'Name', 'IAT1', 'IAT2', 'IAT3', 'Attend', 'Assign', 'Total', 'Grade']],
+                body: rows,
+                theme: 'grid',
+                headStyles: { fillColor: [44, 62, 80], textColor: [255, 255, 255] },
+                styles: { fontSize: 8.5, cellPadding: 2.5 },
+                columnStyles: {
+                    0: { cellWidth: 25 },
+                    1: { cellWidth: 45 },
+                }
+            });
+
+            // Footer
+            const finalY = doc.lastAutoTable.finalY + 20;
+            doc.text('__________________________', 20, finalY);
+            doc.text('Faculty Signature', 20, finalY + 5);
+
+            doc.text('__________________________', 190, finalY, null, null, 'right');
+            doc.text('HOD Signature', 190, finalY + 5, null, null, 'right');
+
+            doc.save(`${subCode}_Marksheet.pdf`);
+        }
+
+        // Initialize on Load
+        window.onload = function () {
+            loadData();
+
+            // Restore section and selections after refresh
+            const lastMode = sessionStorage.getItem('last_mode');
+            if (lastMode) {
+                const modeSelect = document.getElementById('marks_mode_select');
+                if (modeSelect) modeSelect.value = lastMode;
+            }
+
+            const lastSubject = sessionStorage.getItem('last_subject');
+            if (lastSubject) {
+                const subjectSelect = document.getElementById('marks_subject_select');
+                if (subjectSelect) {
+                    const options = Array.from(subjectSelect.options);
+                    if (options.some(opt => opt.value === lastSubject)) {
+                        subjectSelect.value = lastSubject;
+                    }
+                }
+            }
+
+            document.getElementById('marks_mode_select').addEventListener('change', function () {
+                sessionStorage.setItem('last_mode', this.value);
+            });
+            document.getElementById('marks_subject_select').addEventListener('change', function () {
+                sessionStorage.setItem('last_subject', this.value);
+            });
+
+            const lastSection = sessionStorage.getItem('last_section') || 'home';
+            showSection(lastSection);
+        };
+
+    </script>
+
+</body>
+
+</html>

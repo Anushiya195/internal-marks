@@ -1,0 +1,330 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Student Dashboard</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f7f6;
+            color: #333;
+        }
+
+        .dashboard-body {
+            display: flex;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        .sidebar {
+            width: 250px;
+            background-color: #2c3e50;
+            color: white;
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+            flex-shrink: 0;
+        }
+
+        .sidebar h2 {
+            text-align: center;
+            padding: 20px 0;
+            margin: 0;
+            background-color: #1a252f;
+            font-size: 1.2rem;
+        }
+
+        .sidebar a {
+            padding: 15px 20px;
+            text-decoration: none;
+            color: #bdc3c7;
+            display: block;
+            transition: 0.3s;
+            border-left: 4px solid transparent;
+            cursor: pointer;
+        }
+
+        .sidebar a:hover,
+        .sidebar a.active {
+            background-color: #34495e;
+            color: white;
+            border-left-color: #1abc9c;
+        }
+
+        .sidebar .logout {
+            margin-top: auto;
+            background-color: #c0392b;
+            text-align: center;
+            border-left: none;
+        }
+
+        .sidebar .logout:hover {
+            background-color: #e74c3c;
+        }
+
+        .main-content {
+            flex-grow: 1;
+            padding: 20px;
+            overflow-y: auto;
+            background-color: #ecf0f1;
+            position: relative;
+        }
+
+        .header {
+            background: white;
+            padding: 15px;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+            margin-bottom: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .header h1 {
+            margin: 0;
+            font-size: 1.5rem;
+            color: #2c3e50;
+        }
+
+        .content-section {
+            display: none;
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+            animation: fadeIn 0.4s ease-in-out;
+        }
+
+        .content-section.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 15px;
+        }
+
+        th,
+        td {
+            padding: 12px 15px;
+            border-bottom: 1px solid #ddd;
+            text-align: left;
+        }
+
+        th {
+            background-color: #2c3e50;
+            color: white;
+        }
+
+        tr:hover {
+            background-color: #f1f1f1;
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- Sidebar Wrapper -->
+    <div class="dashboard-body">
+        <!-- Sidebar -->
+        <div class="sidebar">
+            <h2>IMMS Student</h2>
+            <a onclick="showSection('home')" id="link_home" class="active">Home</a>
+            <a onclick="showSection('profile')" id="link_profile">My Profile</a>
+            <a onclick="showSection('marks')" id="link_marks">Internal Marks</a>
+            <a href="index.html" class="logout">Logout</a>
+        </div>
+
+        <!-- Main Content -->
+        <div class="main-content">
+            <div class="header">
+                <h1 id="page-title">Student Dashboard</h1>
+                <span>Welcome, <strong id="stu_welcome_name">Student Name</strong></span>
+            </div>
+
+            <!-- Section: Home -->
+            <div id="home" class="content-section active">
+                <h2>Announcements</h2>
+                <div id="announcement_list">
+                    <p>Loading notifications...</p>
+                </div>
+            </div>
+
+            <!-- Section: Profile -->
+            <div id="profile" class="content-section">
+                <h2>My Profile</h2>
+                <div id="profile_details" style="background: white; padding: 20px; border-radius: 8px;">
+                    <p>Loading profile...</p>
+                </div>
+            </div>
+
+            <!-- Section: Marks -->
+            <div id="marks" class="content-section">
+                <h2>Internal Marks Sheet</h2>
+
+                <table id="marks_table">
+                    <thead>
+                        <tr>
+                            <th>Subject</th>
+                            <th>IAT 1</th>
+                            <th>IAT 2</th>
+                            <th>IAT 3</th>
+                            <th>Attend</th>
+                            <th>Assign</th>
+                            <th>Total</th>
+                            <th>Grade</th>
+                        </tr>
+                    </thead>
+                    <tbody id="marks_tbody">
+                        <!-- Dynamic Rows -->
+                    </tbody>
+                </table>
+                <div id="marks_status_msg" style="margin-top:15px; text-align:center; color:#666;"></div>
+            </div>
+
+        </div>
+    </div>
+
+    <script>
+        let currentUser = null;
+        let myProfile = null;
+
+        function initDashboard() {
+            const session = sessionStorage.getItem('loggedInUser');
+            if (!session) {
+                window.location.href = 'index.html';
+                return;
+            }
+            currentUser = JSON.parse(session);
+            document.getElementById('stu_welcome_name').innerText = currentUser.name;
+
+            // Load extra profile data from ims_students
+            const students = JSON.parse(localStorage.getItem('ims_students')) || [];
+            myProfile = students.find(s => s.reg === currentUser.user);
+
+            if (myProfile) {
+                document.getElementById('profile_details').innerHTML = `
+                    <p><strong>Register Number:</strong> ${myProfile.reg}</p>
+                    <p><strong>Name:</strong> ${myProfile.name}</p>
+                    <p><strong>Department:</strong> ${myProfile.dept}</p>
+                    <p><strong>Semester:</strong> ${myProfile.sem}</p>
+                    <p><strong>Email:</strong> ${myProfile.email || '-'}</p>
+                    <p><strong>Address:</strong> ${myProfile.address || '-'}</p>
+                `;
+            }
+
+            loadAnnouncements();
+            loadMarks();
+        }
+
+        function loadAnnouncements() {
+            const pubStatus = JSON.parse(localStorage.getItem('ims_pub_status')) || [];
+            const container = document.getElementById('announcement_list');
+
+            if (pubStatus.length === 0) {
+                container.innerHTML = '<p style="color:#666;">No new notifications from administration.</p>';
+                return;
+            }
+
+            container.innerHTML = pubStatus.slice().reverse().map(pub => `
+                <div style="background: white; padding: 15px; border-left: 5px solid #9b59b6; margin-bottom: 20px; box-shadow: 0 2px 5px rgba(0,0,0,0.1);">
+                    <h3 style="margin-top:0; color:#2c3e50;">${pub.typeLabel} Released: ${pub.dept}</h3>
+                    <p>Your ${pub.typeLabel} for ${pub.year} Year have been officially published. You can now view them in the Marks section.</p>
+                    <small>Published on: ${pub.date}</small>
+                </div>
+            `).join('');
+        }
+
+        function loadMarks() {
+            const tbody = document.getElementById('marks_tbody');
+            const statusMsg = document.getElementById('marks_status_msg');
+
+            if (!myProfile) {
+                tbody.innerHTML = '<tr><td colspan="8">Profile data not found.</td></tr>';
+                return;
+            }
+
+            // Check if results are published for student's dept/year
+            const pubStatus = JSON.parse(localStorage.getItem('ims_pub_status')) || [];
+            const myYear = Math.ceil(parseInt(myProfile.sem) / 2).toString();
+
+            const myPubs = pubStatus.filter(p => p.dept === myProfile.dept && p.year === myYear);
+
+            if (myPubs.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="8" style="padding:40px; color:#e67e22;">Your internal marks have not been published by the administration yet.</td></tr>';
+                statusMsg.innerHTML = '<i class="fas fa-info-circle"></i> Marks are only visible after official Admin approval.';
+                return;
+            }
+
+            const isIAT1Pub = myPubs.some(p => p.type === 'iat1' || p.type === 'internal');
+            const isIAT2Pub = myPubs.some(p => p.type === 'iat2' || p.type === 'internal');
+            const isIAT3Pub = myPubs.some(p => p.type === 'iat3' || p.type === 'internal');
+            const isFinalPub = myPubs.some(p => p.type === 'internal');
+
+            const allMarks = JSON.parse(localStorage.getItem('ims_marks')) || [];
+            const myMarks = allMarks.filter(m => m.reg === myProfile.reg);
+            const allSubjects = JSON.parse(localStorage.getItem('admin_subjects')) || [];
+
+            if (myMarks.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="8">No marks entries found for your registration.</td></tr>';
+                return;
+            }
+
+            tbody.innerHTML = myMarks.map(m => {
+                const sub = allSubjects.find(s => s.code === m.code) || { name: 'Unknown' };
+                return `
+                    <tr>
+                        <td style="text-align:left;"><strong>${sub.name}</strong><br><small>${m.code}</small></td>
+                        <td style="${isIAT1Pub ? '' : 'color:#ccc; font-style:italic; font-size:0.8rem;'}">${isIAT1Pub ? (m.iat1 || 0) : 'Private'}</td>
+                        <td style="${isIAT2Pub ? '' : 'color:#ccc; font-style:italic; font-size:0.8rem;'}">${isIAT2Pub ? (m.iat2 || 0) : 'Private'}</td>
+                        <td style="${isIAT3Pub ? '' : 'color:#ccc; font-style:italic; font-size:0.8rem;'}">${isIAT3Pub ? (m.iat3 || 0) : 'Private'}</td>
+                        <td style="${isFinalPub ? '' : 'color:#ccc; font-style:italic; font-size:0.8rem;'}">${isFinalPub ? (m.attendance || 0) : 'Private'}</td>
+                        <td style="${isFinalPub ? '' : 'color:#ccc; font-style:italic; font-size:0.8rem;'}">${isFinalPub ? (m.assignment || 0) : 'Private'}</td>
+                        <td style="${isFinalPub ? 'font-weight:bold; background:#f4f7f6;' : 'color:#ccc;'}">${isFinalPub ? m.total : '-'}</td>
+                        <td style="${isFinalPub ? 'color:#2980b9; font-weight:bold;' : 'color:#ccc;'}">${isFinalPub ? m.grade : '-'}</td>
+                    </tr>
+                `;
+            }).join('');
+
+            statusMsg.innerHTML = '<span style="color:#27ae60;"><i class="fas fa-check-circle"></i> Showing officially published categories.</span>';
+        }
+
+        function showSection(sectionId) {
+            document.querySelectorAll('.content-section').forEach(sec => sec.classList.remove('active'));
+            document.querySelectorAll('.sidebar a').forEach(link => link.classList.remove('active'));
+
+            document.getElementById(sectionId).classList.add('active');
+            document.getElementById('link_' + sectionId).classList.add('active');
+
+            const titles = {
+                'home': 'Student Dashboard',
+                'profile': 'My Profile',
+                'marks': 'My Internal Marks'
+            };
+            document.getElementById('page-title').innerText = titles[sectionId];
+        }
+
+        window.onload = initDashboard;
+    </script>
+
+</body>
+
+</html>

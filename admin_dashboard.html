@@ -1,0 +1,1235 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f7f6;
+            color: #333;
+        }
+
+        .dashboard-body {
+            display: flex;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        .sidebar {
+            width: 250px;
+            background-color: #2c3e50;
+            color: white;
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+            flex-shrink: 0;
+        }
+
+        .sidebar h2 {
+            text-align: center;
+            padding: 20px 0;
+            margin: 0;
+            background-color: #1a252f;
+            font-size: 1.2rem;
+        }
+
+        .sidebar a {
+            padding: 15px 20px;
+            text-decoration: none;
+            color: #bdc3c7;
+            display: block;
+            transition: 0.3s;
+            border-left: 4px solid transparent;
+            cursor: pointer;
+        }
+
+        .sidebar a:hover,
+        .sidebar a.active {
+            background-color: #34495e;
+            color: white;
+            border-left-color: #1abc9c;
+        }
+
+        .sidebar .logout {
+            margin-top: auto;
+            background-color: #c0392b;
+            text-align: center;
+            border-left: none;
+        }
+
+        .sidebar .logout:hover {
+            background-color: #e74c3c;
+        }
+
+        .main-content {
+            flex-grow: 1;
+            padding: 20px;
+            overflow-y: auto;
+            background-color: #ecf0f1;
+            position: relative;
+        }
+
+        .header {
+            background: white;
+            padding: 15px;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+            margin-bottom: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .header h1 {
+            margin: 0;
+            font-size: 1.5rem;
+            color: #2c3e50;
+        }
+
+        .content-section {
+            display: none;
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+            animation: fadeIn 0.4s ease-in-out;
+        }
+
+        .content-section.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        input,
+        select {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+
+        button,
+        .btn {
+            background-color: #1abc9c;
+            color: white;
+            padding: 10px 15px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: 0.3s;
+            width: auto;
+        }
+
+        button:hover,
+        .btn:hover {
+            background-color: #16a085;
+        }
+
+        .btn-danger {
+            background-color: #e74c3c;
+        }
+
+        .btn-danger:hover {
+            background-color: #c0392b;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 15px;
+        }
+
+        th,
+        td {
+            padding: 12px 15px;
+            border-bottom: 1px solid #ddd;
+            text-align: left;
+        }
+
+        th {
+            background-color: #2c3e50;
+            color: white;
+        }
+
+        tr:hover {
+            background-color: #f1f1f1;
+        }
+
+        .card-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+        }
+
+        .card {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            text-align: center;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+        }
+    </style>
+    <script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
+</head>
+
+<body>
+
+    <div class="dashboard-body">
+        <!-- Sidebar -->
+        <div class="sidebar">
+            <h2>IMMS Admin</h2>
+            <a onclick="showSection('home')" id="link_home" class="active">Overview</a>
+            <a onclick="showSection('add_dept')" id="link_add_dept">Departments</a>
+            <a onclick="showSection('add_subject')" id="link_add_subject">Subjects</a>
+            <a onclick="showSection('add_faculty')" id="link_add_faculty">Faculty</a>
+            <a onclick="showSection('add_student')" id="link_add_student">Students</a>
+            <a onclick="showSection('publish_results')" id="link_publish_results">Publish & Notify</a>
+            <a onclick="showSection('settings')" id="link_settings">System Settings</a>
+            <a href="index.html" class="logout">Logout</a>
+        </div>
+
+        <!-- Main Content -->
+        <div class="main-content">
+            <div class="header">
+                <h1 id="page-title">Admin Overview</h1>
+                <span>Logged in as <strong>Administrator</strong></span>
+            </div>
+
+            <!-- Section: Home -->
+            <div id="home" class="content-section active">
+                <h2>System Status</h2>
+                <div class="card-grid">
+                    <div class="card">
+                        <h3>Departments</h3>
+                        <p id="count_depts">0</p>
+                    </div>
+                    <div class="card">
+                        <h3>Subjects</h3>
+                        <p id="count_subjects">0</p>
+                    </div>
+                    <div class="card">
+                        <h3>Faculty</h3>
+                        <p id="count_faculty">0</p>
+                    </div>
+                    <div class="card">
+                        <h3>Students</h3>
+                        <p id="count_students">0</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Section: Add Department -->
+            <div id="add_dept" class="content-section">
+                <h2>Manage Departments</h2>
+                <div style="max-width:400px; margin-bottom:20px;">
+                    <input type="text" id="dept_name" placeholder="Department Name (e.g. Mechanical)">
+                    <button class="btn" onclick="addDept()">Add Department</button>
+                </div>
+                <h3>Existing Departments</h3>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Department Name</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody id
+                    ="dept_tbody"></tbody>
+                </table>
+            </div>
+
+            <!-- Section: Dept Details (New) -->
+            <div id="dept_details" class="content-section">
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
+                    <h2 id="dept_details_title">Department Details</h2>
+                    <button class="btn" onclick="showSection('add_dept')">Back to Depts</button>
+                </div>
+
+                <div class="tabs" style="margin-bottom:20px; display:flex; gap:10px;">
+                    <button class="btn btn-tab active" onclick="filterDeptDetails(1)">1st Year</button>
+                    <button class="btn btn-tab" onclick="filterDeptDetails(2)">2nd Year</button>
+                    <button class="btn btn-tab" onclick="filterDeptDetails(3)">3rd Year</button>
+                    <button class="btn btn-tab" onclick="filterDeptDetails(4)">4th Year</button>
+                </div>
+
+                <div style="display: flex; flex-direction: column; gap: 30px;">
+                    <div class="card" style="text-align:left; overflow-x: auto;">
+                        <h3
+                            style="margin-bottom: 15px; color: #2c3e50; border-bottom: 2px solid #3498db; padding-bottom: 5px;">
+                            Student List</h3>
+                        <div id="dept_stu_list"></div>
+                    </div>
+                    <div class="card" style="text-align:left; overflow-x: auto;">
+                        <h3
+                            style="margin-bottom: 15px; color: #2c3e50; border-bottom: 2px solid #3498db; padding-bottom: 5px;">
+                            Faculty & Subject Assignments</h3>
+                        <div id="dept_fac_list"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Section: Add Subject -->
+            <div id="add_subject" class="content-section">
+                <h2>Manage Subjects</h2>
+                <div style="max-width:400px; margin-bottom:20px;">
+                    <input type="text" id="sub_name" placeholder="Subject Name">
+                    <input type="text" id="sub_code" placeholder="Subject Code (e.g. ME101)">
+                    <select id="sub_dept_select">
+                        <option>Select Dept</option>
+                    </select>
+                    <select id="sub_year_select">
+                        <option value="">Select Year</option>
+                        <option value="1">1st Year</option>
+                        <option value="2">2nd Year</option>
+                        <option value="3">3rd Year</option>
+                        <option value="4">4th Year</option>
+                    </select>
+                    <input type="number" id="sub_sem" placeholder="Semester (1-8)" min="1" max="8">
+                    <button class="btn" onclick="addSubject()">Add Subject</button>
+                </div>
+                <h3>Subject List</h3>
+                <div style="margin-bottom:10px;">
+                    <label>Filter by Year:</label>
+                    <select id="sub_filter_year" onchange="renderSubjects()" style="width:auto; display:inline-block;">
+                        <option value="All">All Years</option>
+                        <option value="1">1st Year</option>
+                        <option value="2">2nd Year</option>
+                        <option value="3">3rd Year</option>
+                        <option value="4">4th Year</option>
+                    </select>
+                </div>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Code</th>
+                            <th>Name</th>
+                            <th>Dept</th>
+                            <th>Year</th>
+                            <th>Sem</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody id="sub_tbody"></tbody>
+                </table>
+            </div>
+
+            <!-- Section: Add Faculty -->
+            <div id="add_faculty" class="content-section">
+                <h2>Manage Faculty Assignment</h2>
+                <div
+                    style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; background: #f9f9f9; padding: 20px; border-radius: 8px;">
+                    <div>
+                        <h3>Step 1: Staff Info</h3>
+                        <input type="text" id="fac_name" placeholder="Full Name">
+                        <input type="text" id="fac_id" placeholder="Staff ID / Username">
+                        <select id="fac_dept_select" onchange="loadSubjectCheckboxes()">
+                            <option value="">Select Dept</option>
+                        </select>
+                        <select id="fac_year_select" onchange="loadSubjectCheckboxes()">
+                            <option value="All">All Years</option>
+                            <option value="1">1st Year</option>
+                            <option value="2">2nd Year</option>
+                            <option value="3">3rd Year</option>
+                            <option value="4">4th Year</option>
+                        </select>
+                        <select id="fac_sem_select" onchange="loadSubjectCheckboxes()">
+                            <option value="All">All Semesters</option>
+                            <option value="1">Sem 1</option>
+                            <option value="2">Sem 2</option>
+                            <option value="3">Sem 3</option>
+                            <option value="4">Sem 4</option>
+                            <option value="5">Sem 5</option>
+                            <option value="6">Sem 6</option>
+                            <option value="7">Sem 7</option>
+                            <option value="8">Sem 8</option>
+                        </select>
+                    </div>
+                    <div>
+                        <h3>Step 2: Select Subjects</h3>
+                        <div id="subject_checkbox_container"
+                            style="max-height: 200px; overflow-y: auto; border: 1px solid #ddd; padding: 10px; background: white; border-radius: 4px;">
+                            <p style="color: grey;">Select Dept first...</p>
+                        </div>
+                        <div style="display: flex; gap: 10px; margin-top: 15px;">
+                            <button id="btn_fac_submit" class="btn" style="flex: 2;" onclick="addFaculty()">Assign
+                                Selected Subjects</button>
+                            <button id="btn_fac_cancel" class="btn" style="flex: 1; background: #999; display: none;"
+                                onclick="cancelEditFaculty()">Cancel</button>
+                        </div>
+                    </div>
+                </div>
+
+                <h3 style="margin-top: 30px;">Registered Faculty Assignments</h3>
+                <div style="margin-bottom:10px;">
+                    <label>Filter View by Year:</label>
+                    <select id="fac_filter_year" onchange="renderFaculty()" style="width:auto; display:inline-block;">
+                        <option value="All">All Years</option>
+                        <option value="1">1st Year</option>
+                        <option value="2">2nd Year</option>
+                        <option value="3">3rd Year</option>
+                        <option value="4">4th Year</option>
+                    </select>
+                </div>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Name</th>
+                            <th>Dept</th>
+                            <th>Year</th>
+                            <th>Sem</th>
+                            <th>Subject</th>
+                            <th>Code</th>
+                            <th>Credentials</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody id="fac_tbody"></tbody>
+                </table>
+            </div>
+
+            <!-- Section: Add Student -->
+            <div id="add_student" class="content-section">
+                <h2>Manage Students</h2>
+                <div
+                    style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; background: #f9f9f9; padding: 20px; border-radius: 8px;">
+                    <div>
+                        <h3>Academic Info</h3>
+                        <input type="text" id="stu_reg" placeholder="Register Number">
+                        <input type="text" id="stu_name" placeholder="Student Name">
+                        <select id="stu_dept_select">
+                            <option>Select Dept</option>
+                        </select>
+                        <select id="stu_sem_select">
+                            <option value="">Select Semester</option>
+                            <option value="1">Sem 1</option>
+                            <option value="2">Sem 2</option>
+                            <option value="3">Sem 3</option>
+                            <option value="4">Sem 4</option>
+                            <option value="5">Sem 5</option>
+                            <option value="6">Sem 6</option>
+                            <option value="7">Sem 7</option>
+                            <option value="8">Sem 8</option>
+                        </select>
+                    </div>
+                    <div>
+                        <h3>Bio-Data & Parent Contact</h3>
+                        <input type="date" id="stu_dob" title="Date of Birth">
+                        <input type="email" id="stu_email" placeholder="Student Email">
+                        <input type="text" id="stu_parent_phone" placeholder="Parent Mobile Number">
+                        <textarea id="stu_address" placeholder="Residential Address"
+                            style="width:100%; padding:10px; border-radius:4px; border:1px solid #ddd;"></textarea>
+                        <div style="display: flex; gap: 10px; margin-top: 10px;">
+                            <button id="btn_stu_submit" class="btn" style="flex: 2;" onclick="addStudent()">Add
+                                Student</button>
+                            <button id="btn_stu_cancel" class="btn" style="flex: 1; background: #999; display: none;"
+                                onclick="cancelEditStudent()">Cancel</button>
+                        </div>
+                    </div>
+                </div>
+                <h3 style="margin-top:20px;">Enrolled Students</h3>
+                <div style="overflow-x: auto;">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Reg No</th>
+                                <th>Name</th>
+                                <th>Dept</th>
+                                <th>Sem</th>
+                                <th>Parent Phone</th>
+                                <th>Credentials</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody id="stu_tbody"></tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Section: Publish Results -->
+            <div id="publish_results" class="content-section">
+                <div class="header">
+                    <h1 id="page-title-publish" style="margin:0;"><i class="fas fa-bullhorn" style="color:#9b59b6;"></i>
+                        Publish Marks & Notify Parents</h1>
+                </div>
+                <div
+                    style="background:#fff; padding:30px; border-radius:12px; margin-top:20px; box-shadow: 0 10px 30px rgba(0,0,0,0.08);">
+                    <p style="color:#666; margin-bottom:20px;">Officially release CIA/Internal marks and notify parents
+                        via <strong>WhatsApp (Free)</strong>.</p>
+
+                    <div
+                        style="background:#e8f5e9; padding:15px; border-radius:8px; margin-bottom:20px; border:1px solid #c8e6c9;">
+                        <h4 style="margin:0; color:#2e7d32;"><i class="fab fa-whatsapp"></i> Free WhatsApp Broadcast
+                        </h4>
+                        <p style="font-size:0.85rem; margin:5px 0 0 0;">This utility generates personalized marks
+                            reports. You can send them directly to parents without any API costs.</p>
+                    </div>
+
+                    <div style="display:flex; gap:15px; flex-wrap:wrap; margin-bottom:25px;">
+                        <div style="flex:1; min-width:200px;">
+                            <label>Department:</label>
+                            <select id="pub_dept_select"></select>
+                        </div>
+                        <div style="flex:1; min-width:150px;">
+                            <label>Year:</label>
+                            <select id="pub_year_select">
+                                <option value="1">1st Year</option>
+                                <option value="2">2nd Year</option>
+                                <option value="3">3rd Year</option>
+                                <option value="4">4th Year</option>
+                            </select>
+                        </div>
+                        <div style="flex:1; min-width:200px;">
+                            <label>Publish Type:</label>
+                            <select id="pub_type_select">
+                                <option value="iat1">IAT 1 Marks</option>
+                                <option value="iat2">IAT 2 Marks</option>
+                                <option value="iat3">IAT 3 Marks</option>
+                                <option value="internal">Final Internal (Complete)</option>
+                            </select>
+                        </div>
+                        <div style="display:flex; align-items:flex-end;">
+                            <button class="btn" style="background:#9b59b6; padding:12px 25px; height:45px;"
+                                onclick="publishMarksAction()">
+                                <i class="fas fa-paper-plane"></i> Publish & Notify
+                            </button>
+                        </div>
+                    </div>
+
+                    <div id="published_list" style="margin-top:20px; border-top: 1px solid #eee; padding-top: 20px;">
+                        <h4 style="margin-bottom: 10px; color: #2c3e50;">Published Result Overviews:</h4>
+                        <div id="pub_history_container" style="display:flex; gap:10px; flex-wrap:wrap;">
+                            <!-- Dynamic History -->
+                        </div>
+                    </div>
+
+                    <div id="sms_log_container"
+                        style="display:none; border-top:2px solid #f4f7f6; padding-top:25px; animation: fadeIn 0.5s;">
+                        <h3 style="color:#2c3e50;"><i class="fas fa-history"></i> SMS Broadcast Log</h3>
+                        <div id="sms_log"
+                            style="background:#1a1a1a; color:#00ff00; padding:20px; border-radius:10px; font-family: 'Consolas', monospace; height:350px; overflow-y:auto; line-height:1.6; border: 4px solid #333;">
+                        </div>
+                    </div>
+                    <!-- Section: Settings -->
+                    <div id="settings" class="content-section">
+                        <div class="header">
+                            <h1 style="margin:0;"><i class="fas fa-cog"></i> System Settings</h1>
+                        </div>
+                        <div
+                            style="background:#fff; padding:30px; border-radius:12px; margin-top:20px; box-shadow: 0 10px 30px rgba(0,0,0,0.08); border-left: 5px solid #e74c3c;">
+                            <h3 style="color:#e74c3c;">Danger Zone</h3>
+                            <p style="color:#666;">Use these options with caution. Actions taken here are permanent.</p>
+                            <div style="margin-top:20px; display:flex; gap:20px; flex-wrap:wrap;">
+                                <button class="btn btn-danger" style="padding:15px 25px; font-weight:bold;"
+                                    onclick="clearAllData()">
+                                    <i class="fas fa-trash-alt"></i> Reset All System Data
+                                </button>
+                            </div>
+                            <p style="font-size:0.85rem; color:#888; margin-top:10px;">(This will clear all students,
+                                faculty, subjects, and marks records from local storage.)</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- JS Logic for Dynamic Management -->
+            <script>
+                // Init Mock Database in LocalStorage if not exists
+                if (!localStorage.getItem('admin_depts')) {
+                    localStorage.setItem('admin_depts', JSON.stringify(['Computer Science', 'IT', 'Mechanical']));
+                }
+                if (!localStorage.getItem('admin_subjects')) {
+                    localStorage.setItem('admin_subjects', JSON.stringify([
+                        { name: 'Java', code: 'CS301', dept: 'Computer Science', year: '2', sem: 3 },
+                        { name: 'Web Tech', code: 'IT401', dept: 'IT', year: '2', sem: 4 }
+                    ]));
+                }
+                if (!localStorage.getItem('admin_faculty')) {
+                    localStorage.setItem('admin_faculty', JSON.stringify([
+                        { name: 'Dr. John Smith', id: 'fac01', dept: 'Computer Science', subject: 'Java', code: 'CS301', year: '2', sem: 3 }
+                    ]));
+                }
+                if (!localStorage.getItem('ims_students')) { // Shared with Faculty View
+                    localStorage.setItem('ims_students', JSON.stringify([
+                        { name: 'Alice', reg: 'REG001', dept: 'Computer Science', sem: 3 }
+                    ]));
+                }
+
+                // --- View Logic ---
+                function showSection(id) {
+                    document.querySelectorAll('.content-section').forEach(s => s.classList.remove('active'));
+                    document.querySelectorAll('.sidebar a').forEach(a => a.classList.remove('active'));
+                    document.getElementById(id).classList.add('active');
+                    document.getElementById('link_' + id).classList.add('active');
+
+                    // Refresh tables when viewing
+                    renderAll();
+                }
+
+                // --- Render Functions ---
+                function renderAll() {
+                    renderDepts();
+                    renderSubjects();
+                    renderFaculty();
+                    renderStudents();
+                    updateStats();
+                    populateDeptDropdowns();
+                }
+
+                function populateDeptDropdowns() {
+                    const depts = JSON.parse(localStorage.getItem('admin_depts'));
+                    const options = depts.map(d => `<option value="${d}">${d}</option>`).join('');
+
+                    document.getElementById('sub_dept_select').innerHTML = '<option>Select Dept</option>' + options;
+                    document.getElementById('fac_dept_select').innerHTML = '<option>Select Dept</option>' + options;
+                    document.getElementById('stu_dept_select').innerHTML = '<option>Select Dept</option>' + options;
+                    document.getElementById('pub_dept_select').innerHTML = '<option>Select Dept</option>' + options;
+                }
+
+                function renderDepts() {
+                    const list = JSON.parse(localStorage.getItem('admin_depts'));
+                    const tbody = document.getElementById('dept_tbody');
+                    tbody.innerHTML = list.map((dept, i) => `
+                <tr>
+                    <td>${i + 1}</td>
+                    <td>${dept}</td>
+                    <td>
+                        <button class="btn" style="width:auto; padding:5px 10px;" onclick="showDeptDetails('${dept}')">View</button>
+                        <button class="btn btn-danger" style="width:auto; padding:5px 10px;" onclick="delItem('admin_depts', ${i})">Del</button>
+                    </td>
+                </tr>`).join('');
+                }
+
+                let currentViewedDept = '';
+                function showDeptDetails(deptName) {
+                    currentViewedDept = deptName;
+                    document.getElementById('dept_details_title').innerText = deptName + ' - Analysis';
+                    showSection('dept_details');
+                    filterDeptDetails(1); // Default to 1st year
+                }
+
+                function filterDeptDetails(yearNum) {
+                    // Update UI buttons
+                    document.querySelectorAll('.btn-tab').forEach((btn, idx) => {
+                        if (idx + 1 === parseInt(yearNum)) btn.classList.add('active');
+                        else btn.classList.remove('active');
+                    });
+
+                    const yearStr = yearNum.toString();
+
+                    // Filter Students - Logic: 1st Yr (Sem 1-2), 2nd Yr (Sem 3-4), 3rd Yr (Sem 5-6), 4th Yr (Sem 7-8)
+                    const students = JSON.parse(localStorage.getItem('ims_students')) || [];
+                    const filteredStus = students.filter(s => {
+                        const sSem = parseInt(s.sem);
+                        const sYear = Math.ceil(sSem / 2);
+                        return s.dept === currentViewedDept && sYear === parseInt(yearNum);
+                    });
+                    // Sort by name
+                    filteredStus.sort((a, b) => a.name.trim().localeCompare(b.name.trim(), undefined, { sensitivity: 'base' }));
+
+                    document.getElementById('dept_stu_list').innerHTML = filteredStus.length ?
+                        `<table>
+                    <thead>
+                        <tr>
+                            <th style="background:#3498db; color:white;">Reg No</th>
+                            <th style="background:#3498db; color:white;">Student Name</th>
+                            <th style="background:#3498db; color:white;">Semester</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${filteredStus.map(s => `<tr><td>${s.reg}</td><td>${s.name}</td><td>Sem ${s.sem}</td></tr>`).join('')}
+                    </tbody>
+                </table>` : '<p style="padding:10px; color:red;">No students found for this year.</p>';
+
+                    // Filter Faculty
+                    const faculty = JSON.parse(localStorage.getItem('admin_faculty')) || [];
+                    const filteredFac = faculty.filter(f => f.dept === currentViewedDept && f.year === yearStr);
+                    // Sort by name
+                    filteredFac.sort((a, b) => a.name.trim().localeCompare(b.name.trim(), undefined, { sensitivity: 'base' }));
+
+                    document.getElementById('dept_fac_list').innerHTML = filteredFac.length ?
+                        `<table>
+                    <thead>
+                        <tr>
+                            <th style="background:#2ecc71; color:white;">Subject</th>
+                            <th style="background:#2ecc71; color:white;">Faculty Name</th>
+                            <th style="background:#2ecc71; color:white;">Code</th>
+                            <th style="background:#2ecc71; color:white;">Semester</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${filteredFac.map(f => `<tr><td>${f.subject}</td><td><strong>${f.name}</strong></td><td>${f.code}</td><td>Sem ${f.sem}</td></tr>`).join('')}
+                    </tbody>
+                </table>` : '<p style="padding:10px; color:red;">No faculty assigned for this year.</p>';
+                }
+
+                function renderSubjects() {
+                    let list = JSON.parse(localStorage.getItem('admin_subjects')) || [];
+                    const filterYear = document.getElementById('sub_filter_year').value;
+                    if (filterYear !== 'All') {
+                        list = list.filter(sub => sub.year === filterYear);
+                    }
+
+                    const tbody = document.getElementById('sub_tbody');
+                    tbody.innerHTML = list.map((sub, i) => `
+                <tr>
+                    <td>${sub.code}</td>
+                    <td>${sub.name}</td>
+                    <td>${sub.dept}</td>
+                    <td>${sub.year} Yr</td>
+                    <td>${sub.sem || '-'}</td>
+                    <td><button class="btn btn-danger" style="width:auto; padding:5px 10px;" onclick="delItem('admin_subjects', ${i})">Del</button></td>
+                </tr>`).join('');
+                }
+
+                function renderFaculty() {
+                    let list = JSON.parse(localStorage.getItem('admin_faculty')) || [];
+
+                    const filterYear = document.getElementById('fac_filter_year').value;
+                    if (filterYear !== 'All') {
+                        list = list.filter(f => f.year === filterYear);
+                    }
+
+                    const tbody = document.getElementById('fac_tbody');
+                    tbody.innerHTML = list.map((f, i) => `
+                <tr>
+                    <td>${f.id}</td>
+                    <td>${f.name}</td>
+                    <td>${f.dept}</td>
+                    <td>${f.year} Yr</td>
+                    <td>${f.sem || '-'}</td>
+                    <td>${f.subject || '-'}</td>
+                    <td>${f.code || '-'}</td>
+                    <td style="background: #fff8e1; font-family: monospace; font-size: 0.85rem;">
+                        U: ${f.id}<br>P: ${f.id}
+                    </td>
+                    <td>
+                        <button class="btn" style="width:auto; padding:5px 10px; background:#f0ad4e;" onclick="prepareEditFaculty(${i})">Edit</button>
+                        <button class="btn btn-danger" style="width:auto; padding:5px 10px;" onclick="delItem('admin_faculty', ${i})">Del</button>
+                    </td>
+                </tr>`).join('');
+                }
+
+                function renderStudents() {
+                    let list = JSON.parse(localStorage.getItem('ims_students')) || [];
+
+                    const tbody = document.getElementById('stu_tbody');
+                    tbody.innerHTML = list.map((s, i) => `
+                <tr>
+                    <td>${s.reg}</td>
+                    <td>${s.name}</td>
+                    <td>${s.dept}</td>
+                    <td>${s.sem || '-'}</td>
+                    <td>${s.parent_phone || '-'}</td>
+                    <td style="background: #e3f2fd; font-family: monospace; font-size: 0.85rem;">
+                        U: ${s.reg}<br>P: ${s.dob || s.reg}
+                    </td>
+                    <td>
+                        <button class="btn" style="width:auto; padding:5px 10px; background:#f0ad4e;" onclick="prepareEditStudent(${i})">Edit</button>
+                        <button class="btn" style="width:auto; padding:5px 10px;" onclick="alert('Email: ${s.email}\\nDOB: ${s.dob}\\nAddr: ${s.address}')">Bio</button>
+                        <button class="btn btn-danger" style="width:auto; padding:5px 10px;" onclick="delItem('ims_students', ${i})">Del</button>
+                    </td>
+                </tr>`).join('');
+                }
+
+                function updateStats() {
+                    document.getElementById('count_depts').innerText = JSON.parse(localStorage.getItem('admin_depts')).length;
+                    document.getElementById('count_subjects').innerText = JSON.parse(localStorage.getItem('admin_subjects')).length;
+                    document.getElementById('count_faculty').innerText = JSON.parse(localStorage.getItem('admin_faculty')).length;
+                    document.getElementById('count_students').innerText = JSON.parse(localStorage.getItem('ims_students')).length;
+                }
+
+                // --- Add/Delete Functions ---
+                function delItem(key, index) {
+                    if (confirm('Are you sure?')) {
+                        const list = JSON.parse(localStorage.getItem(key));
+                        const item = list[index];
+
+                        list.splice(index, 1);
+                        localStorage.setItem(key, JSON.stringify(list));
+
+                        // If deleting student or faculty, remove their user account too
+                        if (key === 'ims_students') {
+                            syncUserAccount('student', item.reg, '', '', true);
+                        } else if (key === 'admin_faculty') {
+                            // Check if this faculty ID has any other subjects left before deleting account
+                            const stillExists = list.some(f => f.id === item.id);
+                            if (!stillExists) {
+                                syncUserAccount('faculty', item.id, '', '', true);
+                            }
+                        }
+
+                        renderAll();
+                    }
+                }
+
+                function syncUserAccount(role, username, name, password, isDelete = false) {
+                    let users = JSON.parse(localStorage.getItem('ims_users')) || [
+                        { user: 'admin', pass: 'admin123', role: 'admin', name: 'Administrator' }
+                    ];
+
+                    if (isDelete) {
+                        users = users.filter(u => !(u.user === username && u.role === role));
+                    } else {
+                        const idx = users.findIndex(u => u.user === username && u.role === role);
+                        const userData = { user: username, pass: password, role: role, name: name };
+                        if (idx > -1) {
+                            users[idx] = userData;
+                        } else {
+                            users.push(userData);
+                        }
+                    }
+                    localStorage.setItem('ims_users', JSON.stringify(users));
+                }
+
+                function publishMarksAction() {
+                    const dept = document.getElementById('pub_dept_select').value;
+                    const year = document.getElementById('pub_year_select').value;
+                    const type = document.getElementById('pub_type_select').value;
+                    const typeLabel = document.getElementById('pub_type_select').options[document.getElementById('pub_type_select').selectedIndex].text;
+
+                    if (dept === 'Select Dept' || !year) {
+                        alert('Please select Dept and Year to publish.');
+                        return;
+                    }
+
+                    if (!confirm(`Generate WhatsApp Broadcast list for ${dept} (${year} Yr) - ${typeLabel}?`)) return;
+
+                    const allStudents = JSON.parse(localStorage.getItem('ims_students')) || [];
+                    const allMarks = JSON.parse(localStorage.getItem('ims_marks')) || [];
+
+                    const targetStudents = allStudents.filter(s => {
+                        const sSem = parseInt(s.sem);
+                        const sYear = Math.ceil(sSem / 2);
+                        return s.dept === dept && sYear === parseInt(year);
+                    });
+
+                    if (targetStudents.length === 0) {
+                        alert('No students found for this selection.');
+                        return;
+                    }
+
+                    const log = document.getElementById('sms_log');
+                    const container = document.getElementById('sms_log_container');
+                    log.innerHTML = `<div style="color:#f1c40f; border-bottom:1px solid #333; padding-bottom:10px; margin-bottom:10px;">
+                                [${new Date().toLocaleTimeString()}] ${typeLabel.toUpperCase()} BROADCAST LIST READY
+                             </div>`;
+                    container.style.display = 'block';
+
+                    targetStudents.forEach((stu) => {
+                        const stuMarks = allMarks.filter(m => m.reg === stu.reg);
+                        let marksSummary = "";
+
+                        if (type === 'iat1' || type === 'iat2' || type === 'iat3') {
+                            marksSummary = stuMarks.map(m => `*${m.code}*: ${m[type] || 0}/100`).join('\n');
+                        } else {
+                            marksSummary = stuMarks.map(m => `*${m.code}*: Total ${m.total}/50, Grade ${m.grade}`).join('\n');
+                        }
+
+                        if (!marksSummary) marksSummary = "Marks pending entry by faculty.";
+
+                        let message = `*${typeLabel.toUpperCase()} REPORT*\n\nDear Parent,\nYour ward *${stu.name}*'s ${typeLabel} for ${dept} (${year} Year) have been published.\n\n*Results:*\n${marksSummary}\n\n_Please check the student portal for detailed reports._`;
+                        let phone = stu.parent_phone ? stu.parent_phone.trim() : "";
+
+                        // WhatsApp URL (Web/App)
+                        const waUrl = `https://api.whatsapp.com/send?phone=91${phone}&text=${encodeURIComponent(message)}`;
+
+                        log.innerHTML += `
+                    <div style="background:#2c3e50; padding:10px; border-radius:6px; margin-bottom:10px; border-left:4px solid #27ae60; display:flex; justify-content:space-between; align-items:center;">
+                        <div>
+                            <span style="color:#fff; font-weight:bold;">${stu.name}</span><br>
+                            <span style="color:#999; font-size:0.8rem;">To: ${phone || 'No Phone'}</span>
+                        </div>
+                        <a href="${waUrl}" target="_blank" class="btn" style="background:#25D366; font-size:0.8rem; padding:5px 12px; height:auto; text-decoration:none;">
+                            <i class="fab fa-whatsapp"></i> Send Free
+                        </a>
+                    </div>
+                `;
+                    });
+
+                    // Mark as published
+                    const pubStatus = JSON.parse(localStorage.getItem('ims_pub_status')) || [];
+                    pubStatus.push({ dept, year, type, typeLabel, date: new Date().toLocaleDateString() });
+                    localStorage.setItem('ims_pub_status', JSON.stringify(pubStatus));
+                    renderPubHistory();
+
+                    log.scrollTop = 0;
+                }
+
+                function renderPubHistory() {
+                    const status = JSON.parse(localStorage.getItem('ims_pub_status')) || [];
+                    const container = document.getElementById('pub_history_container');
+                    if (status.length === 0) {
+                        container.innerHTML = '<p style="color:#888; font-size:0.85rem;">No results published yet.</p>';
+                        return;
+                    }
+                    container.innerHTML = status.map((s, i) => `
+                        <div style="background:#f0f0f0; padding:8px 12px; border-radius:4px; font-size:0.8rem; border:1px solid #ddd;">
+                            <strong>${s.typeLabel}</strong> - ${s.dept} (${s.year} Yr)<br>
+                            <span style="color:#666;">On ${s.date}</span>
+                            <i class="fas fa-times" style="color:red; margin-left:10px; cursor:pointer;" onclick="deletePubHistory(${i})"></i>
+                        </div>
+                    `).join('');
+                }
+
+                function deletePubHistory(idx) {
+                    const status = JSON.parse(localStorage.getItem('ims_pub_status')) || [];
+                    status.splice(idx, 1);
+                    localStorage.setItem('ims_pub_status', JSON.stringify(status));
+                    renderPubHistory();
+                }
+
+                function addDept() {
+                    const val = document.getElementById('dept_name').value;
+                    if (val) {
+                        const list = JSON.parse(localStorage.getItem('admin_depts'));
+                        list.push(val);
+                        localStorage.setItem('admin_depts', JSON.stringify(list));
+                        document.getElementById('dept_name').value = '';
+                        renderAll();
+                    }
+                }
+
+                function clearAllData() {
+                    if (confirm('CRITICAL WARNING: This will delete ALL data including students, faculty, subjects, and all marks. This action cannot be undone. Are you sure?')) {
+                        if (confirm('Final confirmation: Are you ABSOLUTELY sure?')) {
+                            localStorage.clear();
+                            alert('System storage cleared. Page will now refresh to defaults.');
+                            window.location.reload();
+                        }
+                    }
+                }
+
+                function addSubject() {
+                    const name = document.getElementById('sub_name').value;
+                    const code = document.getElementById('sub_code').value;
+                    const dept = document.getElementById('sub_dept_select').value;
+                    const year = document.getElementById('sub_year_select').value;
+                    const sem = document.getElementById('sub_sem').value;
+
+                    if (name && code && dept !== 'Select Dept' && year && sem) {
+                        const list = JSON.parse(localStorage.getItem('admin_subjects'));
+                        list.push({ name, code, dept, year, sem });
+                        localStorage.setItem('admin_subjects', JSON.stringify(list));
+                        renderAll();
+                        // Clear
+                        document.getElementById('sub_name').value = '';
+                        document.getElementById('sub_code').value = '';
+                        document.getElementById('sub_year_select').value = '';
+                        document.getElementById('sub_sem').value = '';
+                    } else {
+                        alert('Please fill all fields for Subject.');
+                    }
+                }
+
+                let editFacIdx = null;
+                function prepareEditFaculty(index) {
+                    const list = JSON.parse(localStorage.getItem('admin_faculty'));
+                    const f = list[index];
+                    editFacIdx = index;
+
+                    document.getElementById('fac_name').value = f.name;
+                    document.getElementById('fac_id').value = f.id;
+                    document.getElementById('fac_dept_select').value = f.dept;
+                    document.getElementById('fac_year_select').value = f.year;
+                    document.getElementById('fac_sem_select').value = f.sem;
+
+                    document.getElementById('btn_fac_submit').innerText = 'Update Assignment';
+                    document.getElementById('btn_fac_cancel').style.display = 'block';
+
+                    loadSubjectCheckboxes();
+                    window.scrollTo({ top: 0, behavior: 'smooth' });
+                }
+
+                function cancelEditFaculty() {
+                    editFacIdx = null;
+                    document.getElementById('fac_name').value = '';
+                    document.getElementById('fac_id').value = '';
+                    document.getElementById('btn_fac_submit').innerText = 'Assign Selected Subjects';
+                    document.getElementById('btn_fac_cancel').style.display = 'none';
+                    loadSubjectCheckboxes();
+                }
+
+                function loadSubjectCheckboxes() {
+                    const dept = document.getElementById('fac_dept_select').value;
+                    const year = document.getElementById('fac_year_select').value;
+                    const sem = document.getElementById('fac_sem_select').value;
+                    const container = document.getElementById('subject_checkbox_container');
+
+                    if (!dept || dept === 'Select Dept') {
+                        container.innerHTML = '<p style="color: grey;">Select Dept first...</p>';
+                        return;
+                    }
+
+                    const subjects = JSON.parse(localStorage.getItem('admin_subjects')) || [];
+
+                    // Filter initially by Dept
+                    let filtered = subjects.filter(s => s.dept === dept);
+
+                    // Further filter by Year if year is not 'All'
+                    if (year && year !== 'All') {
+                        filtered = filtered.filter(s => s.year === year);
+                    }
+
+                    // Further filter by Sem if sem is not 'All'
+                    if (sem && sem !== 'All') {
+                        filtered = filtered.filter(s => s.sem.toString() === sem.toString());
+                    }
+
+                    if (filtered.length === 0) {
+                        container.innerHTML = `<p style="color: red;">No subjects found for ${dept} in selected criteria.</p>`;
+                        return;
+                    }
+
+                    container.innerHTML = filtered.map(s => {
+                        let checked = "";
+                        if (editFacIdx !== null) {
+                            const list = JSON.parse(localStorage.getItem('admin_faculty'));
+                            if (list[editFacIdx].code === s.code) checked = "checked";
+                        }
+                        return `
+                <div style="margin-bottom: 5px;">
+                    <label style="cursor: pointer;">
+                        <input type="checkbox" name="fac_subjects" value="${s.code}" data-name="${s.name}" data-year="${s.year}" data-sem="${s.sem}" ${checked}> 
+                        ${s.name} (${s.code}) - Yr ${s.year}, Sem ${s.sem}
+                    </label>
+                </div>
+            `;
+                    }).join('');
+                }
+
+                function addFaculty() {
+                    const name = document.getElementById('fac_name').value.trim();
+                    const id = document.getElementById('fac_id').value.trim();
+                    const dept = document.getElementById('fac_dept_select').value;
+                    const selectedCheckboxes = document.querySelectorAll('input[name="fac_subjects"]:checked');
+
+                    if (!name || !id || dept === 'Select Dept') {
+                        alert('Please fill Staff info.');
+                        return;
+                    }
+
+                    const list = JSON.parse(localStorage.getItem('admin_faculty')) || [];
+
+                    // Case: Update existing assignment
+                    if (editFacIdx !== null) {
+                        if (selectedCheckboxes.length > 1) {
+                            alert('When editing, please select only one subject to replace the current one.');
+                            return;
+                        }
+                        const cb = selectedCheckboxes[0];
+                        list[editFacIdx] = {
+                            name, id, dept,
+                            year: cb ? cb.getAttribute('data-year') : list[editFacIdx].year,
+                            sem: cb ? cb.getAttribute('data-sem') : list[editFacIdx].sem,
+                            subject: cb ? cb.getAttribute('data-name') : list[editFacIdx].subject,
+                            code: cb ? cb.value : list[editFacIdx].code
+                        };
+                        list.sort((a, b) => a.name.trim().localeCompare(b.name.trim(), undefined, { sensitivity: 'base' }));
+                        localStorage.setItem('admin_faculty', JSON.stringify(list));
+
+                        // Sync User Account
+                        syncUserAccount('faculty', id, name, id);
+
+                        cancelEditFaculty();
+                        renderAll();
+                        alert('Assignment updated successfully!');
+                        return;
+                    }
+
+                    // Case: New assignments
+                    if (selectedCheckboxes.length === 0) {
+                        alert('Please select at least one subject to assign.');
+                        return;
+                    }
+
+                    const idExists = list.find(f => f.id === id);
+                    if (idExists && idExists.name.toLowerCase() !== name.toLowerCase()) {
+                        alert(`Error: Staff ID ${id} is already registered to "${idExists.name}".`);
+                        return;
+                    }
+
+                    let addedCount = 0;
+                    let errors = [];
+                    selectedCheckboxes.forEach(cb => {
+                        const subCode = cb.value;
+                        const subName = cb.getAttribute('data-name');
+                        const subYear = cb.getAttribute('data-year');
+                        const subSem = cb.getAttribute('data-sem');
+
+                        const subjectTaken = list.find(f => f.code === subCode);
+                        if (subjectTaken) {
+                            errors.push(`Subject ${subName} (${subCode}) is already handled by ${subjectTaken.name} (${subjectTaken.id})`);
+                            return;
+                        }
+
+                        list.push({
+                            name, id, dept,
+                            year: subYear,
+                            sem: subSem,
+                            subject: subName,
+                            code: subCode
+                        });
+                        addedCount++;
+                    });
+
+                    if (errors.length > 0) alert(errors.join('\n'));
+
+                    if (addedCount > 0) {
+                        list.sort((a, b) => a.name.trim().localeCompare(b.name.trim(), undefined, { sensitivity: 'base' }));
+                        localStorage.setItem('admin_faculty', JSON.stringify(list));
+
+                        // Create Faculty Account
+                        syncUserAccount('faculty', id, name, id);
+
+                        renderAll();
+                        alert(`Successfully assigned ${addedCount} subjects to ${name}. Portal account created!`);
+                        loadSubjectCheckboxes();
+                    }
+                }
+
+                let editStuIdx = null;
+                function prepareEditStudent(index) {
+                    const list = JSON.parse(localStorage.getItem('ims_students'));
+                    const s = list[index];
+                    editStuIdx = index;
+
+                    document.getElementById('stu_reg').value = s.reg;
+                    document.getElementById('stu_name').value = s.name;
+                    document.getElementById('stu_dept_select').value = s.dept;
+                    document.getElementById('stu_sem_select').value = s.sem;
+                    document.getElementById('stu_dob').value = s.dob || '';
+                    document.getElementById('stu_email').value = s.email || '';
+                    document.getElementById('stu_parent_phone').value = s.parent_phone || '';
+                    document.getElementById('stu_address').value = s.address || '';
+
+                    document.getElementById('btn_stu_submit').innerText = 'Update Student profile';
+                    document.getElementById('btn_stu_cancel').style.display = 'block';
+                    window.scrollTo({ top: 0, behavior: 'smooth' });
+                }
+
+                function cancelEditStudent() {
+                    editStuIdx = null;
+                    document.getElementById('stu_name').value = '';
+                    document.getElementById('stu_reg').value = '';
+                    document.getElementById('stu_dob').value = '';
+                    document.getElementById('stu_email').value = '';
+                    document.getElementById('stu_parent_phone').value = '';
+                    document.getElementById('stu_address').value = '';
+                    document.getElementById('btn_stu_submit').innerText = 'Add Student';
+                    document.getElementById('btn_stu_cancel').style.display = 'none';
+                }
+
+                function addStudent() {
+                    const name = document.getElementById('stu_name').value.trim();
+                    const reg = document.getElementById('stu_reg').value.trim();
+                    const dept = document.getElementById('stu_dept_select').value;
+                    const sem = document.getElementById('stu_sem_select').value;
+                    const dob = document.getElementById('stu_dob').value;
+                    const email = document.getElementById('stu_email').value;
+                    const parent_phone = document.getElementById('stu_parent_phone').value;
+                    const address = document.getElementById('stu_address').value;
+
+                    if (!name || !reg || dept === 'Select Dept' || !sem || !parent_phone) {
+                        alert('Please fill basic fields including Register No and Parent Mobile.');
+                        return;
+                    }
+
+                    const list = JSON.parse(localStorage.getItem('ims_students')) || [];
+
+                    if (editStuIdx !== null) {
+                        // Update
+                        list[editStuIdx] = { name, reg, dept, sem, dob, email, parent_phone, address };
+                        list.sort((a, b) => a.reg.trim().localeCompare(b.reg.trim(), undefined, { numeric: true, sensitivity: 'base' }));
+                        localStorage.setItem('ims_students', JSON.stringify(list));
+
+                        // Sync User Account
+
+
+
+                        
+                        syncUserAccount('student', reg, name, dob || reg);
+
+                        cancelEditStudent();
+                        alert('Student profile updated successfully!');
+                    } else {
+                        // Duplicate check for new
+                        const exists = list.find(s => s.reg === reg);
+                        if (exists) {
+                            alert(`Error: Register Number ${reg} is already assigned to ${exists.name}`);
+                            return;
+                        }
+                        list.push({ name, reg, dept, sem, dob, email, parent_phone, address });
+
+                        // Sort by Register Number (Roll Number) before final save
+                        list.sort((a, b) => a.reg.trim().localeCompare(b.reg.trim(), undefined, { numeric: true, sensitivity: 'base' }));
+
+                        localStorage.setItem('ims_students', JSON.stringify(list));
+
+                        // Create Student Account (Pw defaults to DOB, if empty then Reg No)
+                        syncUserAccount('student', reg, name, dob || reg);
+
+                        alert('Student added successfully! Portal account created.');
+                    }
+
+                    renderAll();
+
+                    // Clear inputs
+                    document.getElementById('stu_name').value = '';
+                    document.getElementById('stu_reg').value = '';
+                    document.getElementById('stu_dob').value = '';
+                    document.getElementById('stu_email').value = '';
+                    document.getElementById('stu_parent_phone').value = '';
+                    document.getElementById('stu_address').value = '';
+                }
+
+                function sortExistingData() {
+                    // Sort existing Faculty (Case-Insensitive)
+                    let fac = JSON.parse(localStorage.getItem('admin_faculty')) || [];
+                    if (fac.length > 0) {
+                        fac.sort((a, b) => a.name.trim().localeCompare(b.name.trim(), undefined, { sensitivity: 'base' }));
+                        localStorage.setItem('admin_faculty', JSON.stringify(fac));
+
+                        // Sync ALL existing faculty to ims_users
+                        fac.forEach(f => syncUserAccount('faculty', f.id, f.name, f.id));
+                    }
+                    // Sort existing Students by Register Number (Roll Number)
+                    let stu = JSON.parse(localStorage.getItem('ims_students')) || [];
+                    if (stu.length > 0) {
+                        stu.sort((a, b) => a.reg.trim().localeCompare(b.reg.trim(), undefined, { numeric: true, sensitivity: 'base' }));
+                        localStorage.setItem('ims_students', JSON.stringify(stu));
+
+                        // Sync ALL existing students to ims_users
+                        stu.forEach(s => syncUserAccount('student', s.reg, s.name, s.dob || s.reg));
+                    }
+                }
+
+                // Init
+                window.onload = () => {
+                    sortExistingData();
+                    renderAll();
+                };
+            </script>
+
+</body>
+
+</html>
